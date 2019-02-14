@@ -14,22 +14,24 @@ import pass.*;
 
 public class JMinusMinusTestRunner {
 
-    public static Test suite() {
-        TestSuite suite = new TestSuite();
-        suite.addTestSuite(HelloWorldTest.class);
-        suite.addTestSuite(FactorialTest.class);
-        suite.addTestSuite(GCDTest.class);
-        suite.addTestSuite(SeriesTest.class);
-        suite.addTestSuite(ClassesTest.class);
-        return suite;
-    }
+	public static Test suite() {
+		TestSuite suite = new TestSuite();
+		suite.addTestSuite(HelloWorldTest.class);
+		suite.addTestSuite(FactorialTest.class);
+		suite.addTestSuite(GCDTest.class);
+		suite.addTestSuite(SeriesTest.class);
+		suite.addTestSuite(ClassesTest.class);
+		suite.addTestSuite(DivisionTest.class);
+		suite.addTestSuite(RemainderTest.class);
+		return suite;
+	}
 
-    /**
-     * Runs the test suite using the textual runner.
-     */
+	/**
+	 * Runs the test suite using the textual runner.
+	 */
 
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(suite());
-    }
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}
 
 }
