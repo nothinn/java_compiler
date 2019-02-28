@@ -50,6 +50,7 @@ REM 		::= "%"
 SL          ::= "<<"
 SR          ::= ">>"
 SRL         ::= ">>>"
+BWAND		::= "&"
 
 
 // Separators

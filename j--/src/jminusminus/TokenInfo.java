@@ -15,7 +15,7 @@ enum TokenKind {
 	EXTENDS("extends"), FALSE("false"), IF("if"), IMPORT("import"), INSTANCEOF("instanceof"), INT("int"), NEW("new"),
 	NULL("null"), PACKAGE("package"), PRIVATE("private"), PROTECTED("protected"), PUBLIC("public"), RETURN("return"),
 	STATIC("static"), SUPER("super"), THIS("this"), TRUE("true"), VOID("void"), WHILE("while"), PLUS("+"), ASSIGN("="),
-	DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), LE("<="), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="),
+	DEC("--"), BWAND("&"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), LE("<="), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="),
 	STAR("*"), DIV("/"), REM("%"), LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), RBRACK("]"), SEMI(";"),
 	COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL("<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"),
 	STRING_LITERAL("<STRING_LITERAL>"), SL("<<"), SR(">>"), SRL(">>>");

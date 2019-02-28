@@ -994,10 +994,24 @@ public class Parser {
 	private JExpression conditionalAndExpression() {
 		int line = scanner.token().line();
 		boolean more = true;
-		JExpression lhs = equalityExpression();
+		JExpression lhs = bitwiseANDExpression();
 		while (more) {
 			if (have(LAND)) {
-				lhs = new JLogicalAndOp(line, lhs, equalityExpression());
+				lhs = new JLogicalAndOp(line, lhs, bitwiseANDExpression());
+			} else {
+				more = false;
+			}
+		}
+		return lhs;
+	}
+	
+	private JExpression bitwiseANDExpression() {
+		int line= scanner.token().line();
+		boolean more = true;
+		JExpression lhs = equalityExpression();
+		while (more ) {
+			if (have(BWAND)) {
+				lhs = new JBitwiseANDOp(line, lhs, equalityExpression());
 			} else {
 				more = false;
 			}
