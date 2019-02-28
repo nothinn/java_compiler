@@ -191,12 +191,24 @@ class Scanner {
 			}
 		case '>':
 			nextCh();
-			return new TokenInfo(GT, line);
+			if(ch == '>'){
+				nextCh();
+				if(ch == '>'){
+					nextCh();
+					return new TokenInfo(SRL, line);
+				}
+				return new TokenInfo(SR, line);
+			} else {
+				return new TokenInfo(GT, line);
+			}
 		case '<':
 			nextCh();
 			if (ch == '=') {
 				nextCh();
 				return new TokenInfo(LE, line);
+			} else if(ch == '<'){
+				nextCh();
+				return new TokenInfo(SL, line);
 			} else {
 				reportScannerError("Operator < is not supported in j--.");
 				return getNextToken();

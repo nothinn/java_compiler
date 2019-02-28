@@ -1034,8 +1034,8 @@ public class Parser {
 	 * Parse a relational expression.
 	 * 
 	 * <pre>
-	 *   relationalExpression ::= additiveExpression  // level 5
-	 *                              [(GT | LE) additiveExpression 
+	 *   relationalExpression ::= shiftExpression  // level 5
+	 *                              [(GT | LE) shiftExpression 
 	 *                              | INSTANCEOF referenceType]
 	 * </pre>
 	 * 
@@ -1044,17 +1044,51 @@ public class Parser {
 
 	private JExpression relationalExpression() {
 		int line = scanner.token().line();
-		JExpression lhs = additiveExpression();
+		JExpression lhs = shiftExpression();
 		if (have(GT)) {
-			return new JGreaterThanOp(line, lhs, additiveExpression());
+			return new JGreaterThanOp(line, lhs, shiftExpression());
 		} else if (have(LE)) {
-			return new JLessEqualOp(line, lhs, additiveExpression());
+			return new JLessEqualOp(line, lhs, shiftExpression());
 		} else if (have(INSTANCEOF)) {
 			return new JInstanceOfOp(line, lhs, referenceType());
 		} else {
 			return lhs;
 		}
 	}
+
+
+
+
+	/**
+	 * Parse a shift expression.
+	 * 
+	 * <pre>
+	 * shiftExpression ::= additiveExpression          // Level 4
+     *                    {(SL | SR | SRL ) additiveExpression}
+	 * </pre>
+	 * 
+	 * @return an AST for an shiftExpression.
+	 */
+
+	private JExpression shiftExpression() {
+		int line = scanner.token().line();
+		boolean more = true;
+		JExpression lhs = additiveExpression();
+		while (more) {
+			if (have(SL)) {
+				lhs = new JShiftLeftOp(line, lhs, additiveExpression());
+			} else if (have(SR)) {
+				lhs = new JShiftRightOp(line, lhs, additiveExpression());
+			} else if (have(SRL)) {
+				lhs = new JShiftRightLogicalOp(line, lhs, additiveExpression());
+			} else {
+				more = false;
+			}
+		}
+		return lhs;
+	}
+
+
 
 	/**
 	 * Parse an additive expression.
@@ -1111,6 +1145,9 @@ public class Parser {
 		}
 		return lhs;
 	}
+
+	
+
 
 	/**
 	 * Parse an unary expression.
