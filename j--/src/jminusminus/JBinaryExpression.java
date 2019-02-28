@@ -338,6 +338,7 @@ class JShiftRightLogicalOp extends JBinaryExpression {
 		rhs.codegen(output);
 		output.addNoArgInstruction(IUSHR);
 	}
+}
 
 class JBitwiseANDOp extends JBinaryExpression {
 	public JBitwiseANDOp(int line, JExpression lhs, JExpression rhs) {
