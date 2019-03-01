@@ -188,6 +188,12 @@ class Scanner {
 			} else {
 				return new TokenInfo(BWAND, line);
 			}
+		case '|':
+			nextCh();
+			return new TokenInfo(BWOR, line);
+		case '^':
+			nextCh();
+			return new TokenInfo(BWXOR, line);
 		case '>':
 			nextCh();
 			if(ch == '>'){
