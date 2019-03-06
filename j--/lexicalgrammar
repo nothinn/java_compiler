@@ -53,6 +53,8 @@ SRL         ::= ">>>"
 BWAND		::= "&"
 BWXOR		::= "^"
 BWOR		::= "|"
+UC          ::= "~"
+
 
 
 // Separators
