@@ -69,11 +69,18 @@ statementExpression ::= expression // but must have side-effect, eg i++
 
 expression ::= assignmentExpression
 
-assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
+assignmentExpression ::= conditionalOpExpression  // must be a valid lhs - level 13
+                           [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULT_ASSIGN | DIV_ASSIGN | REM_ASSIGN
+                             BWAND_ASSIGN | BWOR_ASSIGN | BWXOR_ASSIGN | SR_ASSIGN | SRL_ASSIGN | SL_ASSIGN) conditionalOpExpression]
 
-conditionalAndExpression ::= bitwiseANDExpression // level 10
-                               {LAND bitwiseANDExpression}
+conditionalOpExpression ::= conditionalOrExpression // level 12
+							[CONDITIONAL_OP conditionalOrExpression]
+							
+conditionalOrExpression ::= conditionalAndExpression // level 11
+							{LOR conditionalAndExpression}
+
+conditionalAndExpression ::= bitwiseORExpression // level 10
+                               {LAND bitwiseORExpression}
                                
 bitwiseORExpression ::= bitwiseXORExpression // level 9
 							{WXOR bitwiseXORExpression}
@@ -85,10 +92,10 @@ bitwiseANDExpression ::= equalityExpression // level 7
 							{BWAND equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
-                         {EQUAL relationalExpression}
+                         {(EQUAL | NOT_EQUAL) relationalExpression}
 
 relationalExpression ::= shiftExpression       // level 5
-                           [(GT | LE) shiftExpression
+                           [(GT | LE | LT | GE) shiftExpression
                            | INSTANCEOF referenceType]
 
 shiftExpression ::= additiveExpression          // Level 4
