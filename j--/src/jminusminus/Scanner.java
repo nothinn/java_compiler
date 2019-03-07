@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.Hashtable;
+
 import static jminusminus.TokenKind.*;
 
 /**
@@ -56,15 +57,33 @@ class Scanner {
 		reserved = new Hashtable<String, TokenKind>();
 		reserved.put(ABSTRACT.image(), ABSTRACT);
 		reserved.put(BOOLEAN.image(), BOOLEAN);
+		reserved.put(BREAK.image(), BREAK);
+		reserved.put(BYTE.image(), BYTE);
+		reserved.put(CASE.image(), CASE);
+		reserved.put(CATCH.image(), CATCH);
 		reserved.put(CHAR.image(), CHAR);
 		reserved.put(CLASS.image(), CLASS);
+		reserved.put(CONST.image(), CONST);
+		reserved.put(CONTINUE.image(), CONTINUE);
+		reserved.put(DEFAULT.image(), DEFAULT);
+		reserved.put(DO.image(), DO);
+		reserved.put(DOUBLE.image(), DOUBLE);
 		reserved.put(ELSE.image(), ELSE);
 		reserved.put(EXTENDS.image(), EXTENDS);
 		reserved.put(FALSE.image(), FALSE);
+		reserved.put(FINAL.image(), FINAL);
+		reserved.put(FINALLY.image(), FINALLY);
+		reserved.put(FLOAT.image(), FLOAT);
+		reserved.put(FOR.image(), FOR);
+		reserved.put(GOTO.image(), GOTO	);
 		reserved.put(IF.image(), IF);
+		reserved.put(IMPLEMENTS.image(), IMPLEMENTS);
 		reserved.put(IMPORT.image(), IMPORT);
 		reserved.put(INSTANCEOF.image(), INSTANCEOF);
 		reserved.put(INT.image(), INT);
+		reserved.put(INTERFACE.image(), INTERFACE);
+		reserved.put(LONG.image(), LONG);
+		reserved.put(NATIVE.image(), NATIVE);
 		reserved.put(NEW.image(), NEW);
 		reserved.put(NULL.image(), NULL);
 		reserved.put(PACKAGE.image(), PACKAGE);
@@ -72,10 +91,19 @@ class Scanner {
 		reserved.put(PROTECTED.image(), PROTECTED);
 		reserved.put(PUBLIC.image(), PUBLIC);
 		reserved.put(RETURN.image(), RETURN);
+		reserved.put(SHORT.image(), SHORT);
 		reserved.put(STATIC.image(), STATIC);
+		reserved.put(STRICTFP.image(), STRICTFP);
 		reserved.put(SUPER.image(), SUPER);
+		reserved.put(SWITCH.image(), SWITCH);
+		reserved.put(SYNCHRONIZED.image(), SYNCHRONIZED);
 		reserved.put(THIS.image(), THIS);
+		reserved.put(THROW.image(), THROW);
+		reserved.put(THROWS.image(), THROWS);
+		reserved.put(TRANSIENT.image(), TRANSIENT);
+		reserved.put(TRY.image(), TRY);
 		reserved.put(TRUE.image(), TRUE);
+		reserved.put(VOLATILE.image(), VOLATILE);
 		reserved.put(VOID.image(), VOID);
 		reserved.put(WHILE.image(), WHILE);
 
