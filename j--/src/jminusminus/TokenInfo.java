@@ -12,10 +12,6 @@ package jminusminus;
 
 enum TokenKind {
 	
-	// Multi-line comments
-	ML_LCOMMENT("/*"),
-	ML_RCOMMENT("*/"),
-	
 	// Reserved words
 	ABSTRACT("abstract"),
 	BOOLEAN("boolean"),
