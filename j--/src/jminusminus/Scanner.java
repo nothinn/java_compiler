@@ -210,7 +210,6 @@ class Scanner {
 			} else {
 				return new TokenInfo(LNOT, line);				
 			}
-			return new TokenInfo(LNOT, line);
         case '~':
             nextCh();
             return new TokenInfo(UC, line);
