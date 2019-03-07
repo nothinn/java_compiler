@@ -196,10 +196,17 @@ class JComplementOp extends JUnaryExpression {
      */
 
     public void codegen(CLEmitter output) {
-
         arg.codegen(output);
         output.addNoArgInstruction(ICONST_M1);
         output.addNoArgInstruction(IXOR);
+        
+        /* Alternative implementation, which plusses one and negates.
+        int offset = ((LocalVariableDefn) ((JVariable) arg).iDefn())
+        .offset();
+        output.addIINCInstruction(offset,1);
+        arg.codegen(output);
+        output.addNoArgInstruction(INEG);
+        */
     }
 
 }
