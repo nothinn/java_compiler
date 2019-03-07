@@ -150,7 +150,6 @@ class JUnPlusOp extends JUnaryExpression {
 
     public void codegen(CLEmitter output) {
         arg.codegen(output);
-        output.addNoArgInstruction(IADD);
     }
 
 }
@@ -199,7 +198,8 @@ class JComplementOp extends JUnaryExpression {
     public void codegen(CLEmitter output) {
 
         arg.codegen(output);
-        output.addNoArgInstruction(ICOMP);
+        output.addNoArgInstruction(ICONST_0);
+        output.addNoArgInstruction(IXOR);
     }
 
 }
