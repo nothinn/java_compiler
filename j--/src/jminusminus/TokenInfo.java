@@ -12,7 +12,7 @@ package jminusminus;
 
 enum TokenKind {
 	
-	// Keywords
+	// Reserved words
 	ABSTRACT("abstract"),
 	BOOLEAN("boolean"),
 	CHAR("char"),
@@ -38,36 +38,55 @@ enum TokenKind {
 	VOID("void"),
 	WHILE("while"),
 	
-	// Symbols
+	// Operators
 	ASSIGN("="),
 	DEC("--"),
 	BWAND("&"),
+	BWAND_ASSIGN("&="),
 	BWOR("|"),
+	BWOR_ASSIGN("|="),
 	BWXOR("^"),
-	COMMA(","),
+	BWXOR_ASSIGN("^"),
+	CONDITIONAL_OP("?"),
 	DIV("/"),
-	DOT("."),
+	DIV_ASSIGN("/="),
 	EQUAL("=="),
+	GE(">="),
 	GT(">"),
 	INC("++"),
 	LAND("&&"),
+	LE("<="),
+	LNOT("!"),
+	LOR("||"),
+	LT("<"),
+	MINUS("-"),
+	MINUS_ASSIGN("-="),
+	MULT_ASSIGN("*="),
+	NOT_EQUAL("!="),
+	PLUS("+"),
+	PLUS_ASSIGN("+="),
+	REM("%"),
+	REM_ASSIGN("%="),
+	STAR("*"),
+	SL("<<"),
+	SR(">>"),
+	SR_ASSIGN(">>="),
+	SRL(">>>"),
+	SRL_ASSIGN(">>>="),
+	SL_ASSIGN("<<="),
+	
+	// Separators
+	COMMA(","),
+	COLON(":"),
+	DOT("."),
 	LBRACK("["),
 	RBRACK("]"),
 	LCURLY("{"),
 	RCURLY("}"),
-	LE("<="),
-	LNOT("!"),
 	LPAREN("("),
 	RPAREN(")"),
-	MINUS("-"),
-	PLUS("+"),
-	PLUS_ASSIGN("+="),
-	REM("%"),
 	SEMI(";"),
-	STAR("*"),
-	SL("<<"),
-	SR(">>"),
-	SRL(">>>"),
+	
 	
 	// Special tokens
 	EOF("<EOF>"),
