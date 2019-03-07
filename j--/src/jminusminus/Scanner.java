@@ -133,16 +133,20 @@ class Scanner {
 					}
 				} else if(ch == '*') {
 					// CharReader maps all new lines to '*/'
+					nextCh();
 					while (true) {
-						nextCh();
 						if(ch == '*') {
 							nextCh();
 							if(ch == '/') {
+								nextCh();
 								break;
 							}
+						}else {
+							nextCh();							
 						}
 					}
 				} else if( ch == '=') {
+					nextCh();
 					return new TokenInfo(DIV_ASSIGN, line);
 				} else {
 					return new TokenInfo(DIV, line);
