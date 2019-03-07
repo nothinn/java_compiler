@@ -101,6 +101,7 @@ enum TokenKind {
 	SRL(">>>"),
 	SRL_ASSIGN(">>>="),
 	SL_ASSIGN("<<="),
+	UC("~"),
 	
 	// Separators
 	COMMA(","),

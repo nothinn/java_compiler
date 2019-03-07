@@ -1208,10 +1208,15 @@ public class Parser {
 
 	private JExpression unaryExpression() {
 		int line = scanner.token().line();
-		if (have(INC)) {
+		if (have(UC)){
+			return new JComplementOp(line, unaryExpression());
+		}
+		else if (have(INC)) {
 			return new JPreIncrementOp(line, unaryExpression());
 		} else if (have(MINUS)) {
 			return new JNegateOp(line, unaryExpression());
+        } else if (have(PLUS)) {
+            return new JUnPlusOp(line, unaryExpression());
 		} else {
 			return simpleUnaryExpression();
 		}

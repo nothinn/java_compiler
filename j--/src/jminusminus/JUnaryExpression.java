@@ -106,7 +106,103 @@ class JNegateOp extends JUnaryExpression {
     }
 
 }
+class JUnPlusOp extends JUnaryExpression {
 
+    /**
+     * Construct an AST node for a Unary Plus expression given its line number,
+     * and the operand.
+     *
+     * @param line
+     *            line in which the complement expression occurs in the source
+     *            file.
+     * @param arg
+     *            the operand.
+     */
+
+    public JUnPlusOp(int line, JExpression arg) {super(line, "+", arg);
+    }
+
+    /**
+     * Analyzing the negation operation involves analyzing its operand, checking
+     * its type and determining the result type.
+     *
+     * @param context
+     *            context in which names are resolved.
+     * @return the analyzed (and possibly rewritten) AST subtree.
+     */
+
+    public JExpression analyze(Context context) {
+
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    /**
+     * Generating code for the complement operation involves generating code for
+     * the operand, and then the complement instruction.
+     *
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     */
+
+    public void codegen(CLEmitter output) {
+        arg.codegen(output);
+    }
+
+}
+class JComplementOp extends JUnaryExpression {
+
+    /**
+     * Construct an AST node for a Unary Complement expression given its line number,
+     * and the operand.
+     *
+     * @param line
+     *            line in which the complement expression occurs in the source
+     *            file.
+     * @param arg
+     *            the operand.
+     */
+
+    public JComplementOp(int line, JExpression arg) {
+        super(line, "~", arg);
+    }
+
+    /**
+     * Analyzing the unary complement operation involves analyzing its operand, checking
+     * its type and determining the result type.
+     *
+     * @param context
+     *            context in which names are resolved.
+     * @return the analyzed (and possibly rewritten) AST subtree.
+     */
+
+    public JExpression analyze(Context context) {
+        arg = arg.analyze(context);
+        arg.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    /**
+     * Generating code for the complement operation involves generating code for
+     * the operand, and then the complement instruction.
+     *
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     */
+
+    public void codegen(CLEmitter output) {
+
+        arg.codegen(output);
+        output.addNoArgInstruction(ICONST_M1);
+        output.addNoArgInstruction(IXOR);
+    }
+
+}
 /**
  * The AST node for a logical NOT (!) expression.
  */
