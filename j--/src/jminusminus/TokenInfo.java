@@ -11,14 +11,70 @@ package jminusminus;
  */
 
 enum TokenKind {
-	EOF("<EOF>"), ABSTRACT("abstract"), BOOLEAN("boolean"), CHAR("char"), CLASS("class"), ELSE("else"),
-	EXTENDS("extends"), FALSE("false"), IF("if"), IMPORT("import"), INSTANCEOF("instanceof"), INT("int"), NEW("new"),
-	NULL("null"), PACKAGE("package"), PRIVATE("private"), PROTECTED("protected"), PUBLIC("public"), RETURN("return"),
-	STATIC("static"), SUPER("super"), THIS("this"), TRUE("true"), VOID("void"), WHILE("while"), PLUS("+"), ASSIGN("="),
-	DEC("--"), BWOR("|"), BWXOR("^"), BWAND("&"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), LE("<="), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="),
-	STAR("*"), DIV("/"), REM("%"), LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), RBRACK("]"), SEMI(";"),
-	COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL("<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"),
-	STRING_LITERAL("<STRING_LITERAL>"), SL("<<"), SR(">>"), SRL(">>>");
+	
+	// Keywords
+	ABSTRACT("abstract"),
+	BOOLEAN("boolean"),
+	CHAR("char"),
+	CLASS("class"),
+	ELSE("else"),
+	EXTENDS("extends"),
+	FALSE("false"),
+	IF("if"),
+	IMPORT("import"),
+	INSTANCEOF("instanceof"),
+	INT("int"),
+	NEW("new"),
+	NULL("null"),
+	PACKAGE("package"),
+	PRIVATE("private"),
+	PROTECTED("protected"),
+	PUBLIC("public"),
+	RETURN("return"),
+	STATIC("static"),
+	SUPER("super"),
+	THIS("this"),
+	TRUE("true"),
+	VOID("void"),
+	WHILE("while"),
+	
+	// Symbols
+	ASSIGN("="),
+	DEC("--"),
+	BWAND("&"),
+	BWOR("|"),
+	BWXOR("^"),
+	COMMA(","),
+	DIV("/"),
+	DOT("."),
+	EQUAL("=="),
+	GT(">"),
+	INC("++"),
+	LAND("&&"),
+	LBRACK("["),
+	RBRACK("]"),
+	LCURLY("{"),
+	RCURLY("}"),
+	LE("<="),
+	LNOT("!"),
+	LPAREN("("),
+	RPAREN(")"),
+	MINUS("-"),
+	PLUS("+"),
+	PLUS_ASSIGN("+="),
+	REM("%"),
+	SEMI(";"),
+	STAR("*"),
+	SL("<<"),
+	SR(">>"),
+	SRL(">>>"),
+	
+	// Special tokens
+	EOF("<EOF>"),
+	IDENTIFIER("<IDENTIFIER>"),
+	INT_LITERAL("<INT_LITERAL>"),
+	CHAR_LITERAL("<CHAR_LITERAL>"),
+	STRING_LITERAL("<STRING_LITERAL>");
 
 	/** The token's string representation. */
 	private String image;
