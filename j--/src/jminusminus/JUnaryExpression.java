@@ -198,7 +198,7 @@ class JComplementOp extends JUnaryExpression {
     public void codegen(CLEmitter output) {
 
         arg.codegen(output);
-        output.addNoArgInstruction(ICONST_0);
+        output.addNoArgInstruction(ICONST_M1);
         output.addNoArgInstruction(IXOR);
     }
 

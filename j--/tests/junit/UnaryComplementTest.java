@@ -15,8 +15,8 @@ public class UnaryComplementTest extends TestCase {
         super.tearDown();
     }
 
-    public void testUnaryComplement(){
-        this.assertEquals(un.complement(0),1);
+    public void testUnaryComplement(){      
+        this.assertEquals(un.complement(0),-1);
         this.assertEquals(un.complement(2),-3);
 
     }

@@ -1208,7 +1208,10 @@ public class Parser {
 
 	private JExpression unaryExpression() {
 		int line = scanner.token().line();
-		if (have(INC)) {
+		if (have(UC)){
+			return new JComplementOp(line, unaryExpression());
+		}
+		else if (have(INC)) {
 			return new JPreIncrementOp(line, unaryExpression());
 		} else if (have(MINUS)) {
 			return new JNegateOp(line, unaryExpression());
@@ -1237,10 +1240,7 @@ public class Parser {
 
 	private JExpression simpleUnaryExpression() {
 		int line = scanner.token().line();
-		if (have(UC)){
-			return new JComplementOp(line, unaryExpression());
-		}
-		else if (have(LNOT)) {
+		if (have(LNOT)) {
 			return new JLogicalNotOp(line, unaryExpression());
 		} else if (seeCast()) {
 			mustBe(LPAREN);
