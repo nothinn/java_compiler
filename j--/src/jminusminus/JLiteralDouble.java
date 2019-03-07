@@ -23,7 +23,7 @@ class JLiteralDouble extends JExpression {
      *            string representation of the literal.
      */
 
-    public JLiteralInt(int line, String text) {
+    public JLiteralDouble(int line, String text) {
         super(line);
         this.text = text;
     }
@@ -37,7 +37,7 @@ class JLiteralDouble extends JExpression {
      */
 
     public JExpression analyze(Context context) {
-        type = Type.Double;
+        type = Type.DOUBLE;
         return this;
     }
 
@@ -52,21 +52,14 @@ class JLiteralDouble extends JExpression {
 
     public void codegen(CLEmitter output) {
         double i = Double.parseDouble(text);
-        switch (i) {
-        case 0.0:
+        if(i == 0.0){
             output.addNoArgInstruction(DCONST_0);
-            break;
-        case 1.0:
+        }
+        else if(i == 1.0){
             output.addNoArgInstruction(DCONST_1);
-            break;
-        default:
-            if (i > 1.0 && i <= 127) {
-                output.addOneArgInstruction(BIPUSH, i);
-            } else if (i >= 128 && i <= 32767) {
-                output.addOneArgInstruction(SIPUSH, i);
-            } else {
-                output.addLDCInstruction(i);
-            }
+        }
+        else{
+            output.addLDCInstruction(i);
         }
     }
 
