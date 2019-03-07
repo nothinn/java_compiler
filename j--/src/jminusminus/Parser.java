@@ -1237,7 +1237,10 @@ public class Parser {
 
 	private JExpression simpleUnaryExpression() {
 		int line = scanner.token().line();
-		if (have(LNOT)) {
+		if (have(UC)){
+			return new JComplementOp(line, unaryExpression());
+		}
+		else if (have(LNOT)) {
 			return new JLogicalNotOp(line, unaryExpression());
 		} else if (seeCast()) {
 			mustBe(LPAREN);
