@@ -538,7 +538,7 @@ class JPreIncrementOp extends JUnaryExpression {
          */
 
         public JPreDecrementOp(int line, JExpression arg) {
-            super(line, "++pre", arg);
+            super(line, "--pre", arg);
         }
 
         /**
