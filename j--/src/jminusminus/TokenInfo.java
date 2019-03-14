@@ -121,7 +121,8 @@ enum TokenKind {
 	IDENTIFIER("<IDENTIFIER>"),
 	INT_LITERAL("<INT_LITERAL>"),
 	CHAR_LITERAL("<CHAR_LITERAL>"),
-	STRING_LITERAL("<STRING_LITERAL>");
+	STRING_LITERAL("<STRING_LITERAL>"),
+	DOUBLE_LITERAL("<DOUBLE_LITERAL>");
 
 	/** The token's string representation. */
 	private String image;
