@@ -977,6 +977,10 @@ public class Parser {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
 			return new JPlusAssignOp(line, lhs, assignmentExpression());
+		} else if(have(MULT_ASSIGN)) {
+			return new JMultAssignOp(line, lhs, assignmentExpression());
+		} else if(have(REM_ASSIGN)) {
+			return new JRemAssignOp(line, lhs, assignmentExpression());
 		} else {
 			return lhs;
 		}

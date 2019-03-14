@@ -191,3 +191,145 @@ class JPlusAssignOp extends JAssignment {
     }
 
 }
+
+class JMultAssignOp extends JAssignment {
+
+    /**
+     * Construct the AST node for a *= expression given its lhs and rhs
+     * operands.
+     * 
+     * @param line
+     *            line in which the assignment expression occurs in the source
+     *            file.
+     * @param lhs
+     *            the lhs operand.
+     * @param rhs
+     *            the rhs operand.
+     */
+
+    public JMultAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "*=", lhs, rhs);
+    }
+
+    /**
+     * Analyze the lhs and rhs, checking that types match, and set the result
+     * type.
+     * 
+     * @param context
+     *            context in which names are resolved.
+     * @return the analyzed (and possibly rewritten) AST subtree.
+     */
+
+    public JExpression analyze(Context context) {
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+	    return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.INT)) {
+            rhs.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for *=: " + lhs.type());
+        }
+        return this;
+    }
+
+    /**
+     * Code generation for *= involves, generating code for loading any
+     * necessary l-value and r-value onto the stack for doing the store.
+     * 
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     */
+
+    public void codegen(CLEmitter output) {
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IMUL);
+        
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+    }
+
+}
+
+class JRemAssignOp extends JAssignment {
+
+    /**
+     * Construct the AST node for a %= expression given its lhs and rhs
+     * operands.
+     * 
+     * @param line
+     *            line in which the assignment expression occurs in the source
+     *            file.
+     * @param lhs
+     *            the lhs operand.
+     * @param rhs
+     *            the rhs operand.
+     */
+
+    public JRemAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "%=", lhs, rhs);
+    }
+
+    /**
+     * Analyze the lhs and rhs, checking that types match, and set the result
+     * type.
+     * 
+     * @param context
+     *            context in which names are resolved.
+     * @return the analyzed (and possibly rewritten) AST subtree.
+     */
+
+    public JExpression analyze(Context context) {
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+	    return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.INT)) {
+            rhs.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for %=: " + lhs.type());
+        }
+        return this;
+    }
+
+    /**
+     * Code generation for %= involves, generating code for loading any
+     * necessary l-value and r-value onto the stack for doing the store.
+     * 
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     */
+
+    public void codegen(CLEmitter output) {
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IREM);
+        
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+    }
+
+}
