@@ -977,6 +977,14 @@ public class Parser {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
 			return new JPlusAssignOp(line, lhs, assignmentExpression());
+		} else if(have(MULT_ASSIGN)) {
+			return new JMultAssignOp(line, lhs, assignmentExpression());
+		} else if(have(REM_ASSIGN)) {
+			return new JRemAssignOp(line, lhs, assignmentExpression());
+		} else if (have(DIV_ASSIGN)){
+			return new JDivAssignOp(line, lhs, assignmentExpression());
+		} else if (have(MINUS_ASSIGN)) {
+			return new JMinusAssignOp(line, lhs, assignmentExpression());
 		} else {
 			return lhs;
 		}
@@ -1238,6 +1246,8 @@ public class Parser {
 			return new JComplementOp(line, unaryExpression());
         } else if (have(INC)) {
 			return new JPreIncrementOp(line, unaryExpression());
+		} else if (have(DEC)) {
+			return new JPreDecrementOp(line, unaryExpression());
 		} else if (have(MINUS)) {
 			return new JNegateOp(line, unaryExpression());
         } else if (have(PLUS)) {
@@ -1297,6 +1307,8 @@ public class Parser {
 		}
 		while (have(DEC)) {
 			primaryExpr = new JPostDecrementOp(line, primaryExpr);
+		}while (have(INC)) {
+			primaryExpr = new JPostIncrementOp(line, primaryExpr);
 		}
 		return primaryExpr;
 	}

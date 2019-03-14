@@ -4,6 +4,7 @@ public class Operators {
     public static void main(String[] args) {
         System.out.println(true && false || true);
         int x = 42;
+        x += 2;
         x -= 2;
         x *= 2;
         x /= 10;
