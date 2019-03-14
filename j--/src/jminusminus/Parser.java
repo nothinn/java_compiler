@@ -1222,6 +1222,8 @@ public class Parser {
 			return new JComplementOp(line, unaryExpression());
         } else if (have(INC)) {
 			return new JPreIncrementOp(line, unaryExpression());
+		} else if (have(DEC)) {
+			return new JPreDecrementOp(line, unaryExpression());
 		} else if (have(MINUS)) {
 			return new JNegateOp(line, unaryExpression());
         } else if (have(PLUS)) {
@@ -1281,6 +1283,8 @@ public class Parser {
 		}
 		while (have(DEC)) {
 			primaryExpr = new JPostDecrementOp(line, primaryExpr);
+		}while (have(INC)) {
+			primaryExpr = new JPostIncrementOp(line, primaryExpr);
 		}
 		return primaryExpr;
 	}
