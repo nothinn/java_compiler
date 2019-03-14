@@ -981,6 +981,30 @@ public class Parser {
 			return lhs;
 		}
 	}
+    /**
+	 * Parse a conditional-or expression.
+	 * 
+	 * <pre>
+	 *   conditionalOrExpression ::= conditionalAndExpression // level 10
+	 *                                  {LOR conditionalAndExpression}
+	 * </pre>
+	 * 
+	 * @return an AST for a conditionalExpression.
+	 */
+
+	private JExpression conditionalOrExpression() {
+		int line = scanner.token().line();
+		boolean more = true;
+		JExpression lhs = conditionalAndExpression();
+		while (more) {
+			if (have(LOR)) {
+				lhs = new JLogicalOrOp(line, lhs, conditionalAndExpression());
+			} else {
+				more = false;
+			}
+		}
+		return lhs;
+	} 
 
 	/**
 	 * Parse a conditional-and expression.
