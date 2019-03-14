@@ -365,7 +365,17 @@ class Scanner {
 			return new TokenInfo(STRING_LITERAL, buffer.toString(), line);
 		case '.':
 			nextCh();
-			return new TokenInfo(DOT, line);
+			if(isDigit(ch) ){
+				buffer = new StringBuffer();
+				buffer.append('.');
+				while(isDigit(ch)){
+					buffer.append(ch);
+					nextCh();
+				}
+				return new TokenInfo(DOUBLE_LITERAL, buffer.toString(),line);
+			}else{
+				return new TokenInfo(DOT, line);
+			}
 		case ':':
 			nextCh();
 			return new TokenInfo(COLON, line);
@@ -374,7 +384,9 @@ class Scanner {
 		case '0':
 			// Handle only simple decimal integers for now.
 			nextCh();
-			return new TokenInfo(INT_LITERAL, "0", line);
+			if(ch != '.'){
+				return new TokenInfo(INT_LITERAL, "0", line);
+			}
 		case '1':
 		case '2':
 		case '3':
@@ -385,9 +397,16 @@ class Scanner {
 		case '8':
 		case '9':
 			buffer = new StringBuffer();
-			while (isDigit(ch)) {
+			boolean hasDot = false;
+			while (isDigit(ch) || ch == '.') { //TODO add other ways to scan double, such as 42.0D
+				if (ch == '.'){
+					hasDot = true;
+				}
 				buffer.append(ch);
 				nextCh();
+			}
+			if (hasDot){
+				return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);
 			}
 			return new TokenInfo(INT_LITERAL, buffer.toString(), line);
 		default:
