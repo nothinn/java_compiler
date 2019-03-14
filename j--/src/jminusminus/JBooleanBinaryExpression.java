@@ -247,6 +247,6 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         //TODO: Codegen using Jcc
-                }
+       }
 
 }
