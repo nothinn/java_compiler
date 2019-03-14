@@ -979,6 +979,8 @@ public class Parser {
 			return new JPlusAssignOp(line, lhs, assignmentExpression());
 		} else if (have(DIV_ASSIGN)){
 			return new JDivAssignOp(line, lhs, assignmentExpression());
+		} else if (have(MINUS_ASSIGN)) {
+			return new JMinusAssignOp(line, lhs, assignmentExpression());
 		} else {
 			return lhs;
 		}
