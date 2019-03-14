@@ -981,6 +981,8 @@ public class Parser {
 			return new JMultAssignOp(line, lhs, assignmentExpression());
 		} else if(have(REM_ASSIGN)) {
 			return new JRemAssignOp(line, lhs, assignmentExpression());
+		} else if (have(MINUS_ASSIGN)) {
+			return new JMinusAssignOp(line, lhs, assignmentExpression());
 		} else {
 			return lhs;
 		}
