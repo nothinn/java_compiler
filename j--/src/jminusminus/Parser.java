@@ -972,7 +972,7 @@ public class Parser {
 
 	private JExpression assignmentExpression() {
 		int line = scanner.token().line();
-		JExpression lhs = conditionalOrExpression();
+		JExpression lhs = conditionalExpression();
 		if (have(ASSIGN)) {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
@@ -989,6 +989,21 @@ public class Parser {
 			return lhs;
 		}
 	}
+
+
+	private JExpression conditionalExpression(){
+		int line = scanner.token().line();
+		JExpression test = conditionalOrExpression();
+
+		if (have(CONDITIONAL_OP)){
+			JExpression consequent = conditionalExpression();
+			mustBe(COLON);
+			JExpression alternate = conditionalExpression();
+			return new JConditionalExpression(line, test, consequent, alternate);
+		}
+		return test;
+	}	
+
     /**
 	 * Parse a conditional-or expression.
 	 * 
