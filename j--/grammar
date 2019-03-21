@@ -7,15 +7,23 @@ compilationUnit ::= [PACKAGE qualifiedIdentifier SEMI]
 
 qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
 
-typeDeclaration ::= modifiers classDeclaration
+typeDeclaration ::= ((modifiers classDeclaration) | ([PUBLIC] interfaceDeclaration)) 
 
 modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
-                       [EXTENDS qualifiedIdentifier] 
+                       [EXTENDS qualifiedIdentifier]
+                       [IMPLEMENTS qualifiedIdentifier] //implemented in parser
                        classBody
+                       
 
 classBody ::= LCURLY {modifiers memberDecl} RCURLY
+
+interfaceDeclaration ::= INTERFACE IDENTIFIER			
+							[EXTENDS qualifiedIdentifier]
+							interfaceBody
+
+interfaceBody ::= LCURLY {modifiers interfaceMemberDecl] RCURLY 
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
@@ -23,12 +31,17 @@ memberDecl ::= IDENTIFIER            // constructor
                  formalParameters
                  (block | SEMI)
              | type variableDeclarators SEMI // field
+             
+interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+							formalParameters
+							SEMI
+						| type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
 blockStatement ::= localVariableDeclarationStatement
                  | statement
-
+	
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
