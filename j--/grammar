@@ -7,15 +7,23 @@ compilationUnit ::= [PACKAGE qualifiedIdentifier SEMI]
 
 qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
 
-typeDeclaration ::= modifiers classDeclaration
+typeDeclaration ::= ((modifiers classDeclaration) | ([PUBLIC] interfaceDeclaration)) 
 
 modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
-                       [EXTENDS qualifiedIdentifier] 
+                       [EXTENDS qualifiedIdentifier]
+                       [IMPLEMENTS qualifiedIdentifier] //implemented in parser
                        classBody
+                       
 
 classBody ::= LCURLY {modifiers memberDecl} RCURLY
+
+interfaceDeclaration ::= INTERFACE IDENTIFIER			
+							[EXTENDS qualifiedIdentifier]
+							interfaceBody
+
+interfaceBody ::= LCURLY {modifiers interfaceMemberDecl] RCURLY 
 
 memberDecl ::= block                  // inner block
              | IDENTIFIER            // constructor
@@ -24,12 +32,17 @@ memberDecl ::= block                  // inner block
                  formalParameters
                  (block | SEMI)
              | type variableDeclarators SEMI // field
+             
+interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+							formalParameters
+							SEMI
+						| type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
 blockStatement ::= localVariableDeclarationStatement
                  | statement
-
+	
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
@@ -74,8 +87,8 @@ assignmentExpression ::= conditionalOpExpression  // must be a valid lhs - level
                            [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULT_ASSIGN | DIV_ASSIGN | REM_ASSIGN
                              BWAND_ASSIGN | BWOR_ASSIGN | BWXOR_ASSIGN | SR_ASSIGN | SRL_ASSIGN | SL_ASSIGN) conditionalOpExpression]
 
-conditionalOpExpression ::= conditionalOrExpression // level 12
-							[CONDITIONAL_OP conditionalOrExpression]
+conditionalExpression ::=  --Level 12
+	        conditionalOrExpression [ ? assignmentExpression : conditionalExpression]
 							
 conditionalOrExpression ::= conditionalAndExpression // level 11
 							{LOR conditionalAndExpression}
