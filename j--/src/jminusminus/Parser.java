@@ -592,7 +592,7 @@ public class Parser {
 	 * Parse a member declaration.
 	 * 
 	 * <pre>
-	 *   memberDecl ::= block 	   				// inner block
+	 *   memberDecl ::= [STATIC] block 	   		// inner block
 	 * 				  | IDENTIFIER            // constructor
 	 *                    formalParameters
 	 *                    block

@@ -25,7 +25,7 @@ interfaceDeclaration ::= INTERFACE IDENTIFIER
 
 interfaceBody ::= LCURLY {modifiers interfaceMemberDecl] RCURLY 
 
-memberDecl ::= block                  // inner block
+memberDecl ::= [STATIC] block         // inner block
              | IDENTIFIER            // constructor
                  formalParameters block
              | (VOID | type) IDENTIFIER  // method
