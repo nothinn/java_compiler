@@ -381,15 +381,30 @@ public class Parser {
 	 * Parse a type declaration.
 	 * 
 	 * <pre>
-	 *   typeDeclaration ::= modifiers classDeclaration
+	 *   typeDeclaration ::= ((modifiers classDeclaration) | ([PUBLIC] interfaceDeclaration))
 	 * </pre>
 	 * 
 	 * @return an AST for a typeDeclaration.
 	 */
 
 	private JAST typeDeclaration() {
-		ArrayList<String> mods = modifiers();
-		return classDeclaration(mods);
+		ArrayList<String> mods = new ArrayList<String>();
+		if (have(PUBLIC)) {
+			mods.add("public");
+			if (see(INTERFACE)) {
+				return interfaceDeclaration(mods);
+			}else if (see(CLASS)){
+				return classDeclaration(mods);
+			}else {
+				mods.addAll(modifiers());
+				return classDeclaration(mods);
+			}
+		}else if(see(INTERFACE)) {
+			return interfaceDeclaration(mods);
+		}else {
+			mods = modifiers(); 
+			return classDeclaration(mods); // if we have seen other modifers then public we will go to class declaration which will catch an error if it sees INTERFACE
+		}
 	}
 
 	/**
@@ -465,8 +480,9 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   classDeclaration ::= CLASS IDENTIFIER 
-	 *                        [EXTENDS qualifiedIdentifier] 
-	 *                        classBody
+                       			[EXTENDS qualifiedIdentifier]
+			                    [IMPLEMENTS qualifiedIdentifier] //change has to be implemented
+			                    classBody
 	 * </pre>
 	 * 
 	 * A class which doesn't explicitly extend another (super) class implicitly
@@ -476,18 +492,24 @@ public class Parser {
 	 * @return an AST for a classDeclaration.
 	 */
 
-	private JClassDeclaration classDeclaration(ArrayList<String> mods) {
+	private JClassDeclaration classDeclaration(ArrayList<String> mods) { //have to be modified to suppoert IMPLMENTS
 		int line = scanner.token().line();
 		mustBe(CLASS);
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		Type superClass;
+		Type implmentInterface;
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
-		return new JClassDeclaration(line, mods, name, superClass, classBody());
+		if (have(IMPLEMENTS)) {
+			implmentInterface = qualifiedIdentifier();
+		} else {
+			implmentInterface = null;
+		}
+		return new JClassDeclaration(line, mods, name, superClass, implmentInterface, classBody());
 	}
 
 	/**
@@ -507,6 +529,60 @@ public class Parser {
 		mustBe(LCURLY);
 		while (!see(RCURLY) && !see(EOF)) {
 			members.add(memberDecl(modifiers()));
+		}
+		mustBe(RCURLY);
+		return members;
+	}
+	
+	
+	/**
+	 * Parse a interface declaration.
+	 * 
+	 * <pre>
+	 *   interfaceDeclaration ::= INTERFACE IDENTIFIER 
+	 *                        [EXTENDS qualifiedIdentifier] 
+	 *                        interfaceBody
+	 * </pre>
+	 * 
+	 * A class which doesn't explicitly extend another (super) class implicitly - Dont know if this is equivelent with interfaces
+	 * extends the superclass java.lang.Object.
+	 * 
+	 * @param mods the public modifiers.
+	 * @return an AST for a InterfaceDeclaration.
+	 */
+
+	private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods) {
+		int line = scanner.token().line();
+		mustBe(INTERFACE);
+		mustBe(IDENTIFIER);
+		String name = scanner.previousToken().image();
+		Type superInterface;						//must be implemented
+		if (have(EXTENDS)) {
+			superInterface = qualifiedIdentifier();
+		} else {
+			superInterface = Type.OBJECT;
+		}
+		return new JInterfaceDeclaration(line, mods, name, superInterface, interfaceBody());
+	}
+	
+	
+	/**
+	 * Parse a interface body.
+	 * 
+	 * <pre>
+	 *   classBody ::= LCURLY
+	 *                   {modifiers interfaceMemberDecl}
+	 *                 RCURLY
+	 * </pre>
+	 * 
+	 * @return list of members in the interface body.
+	 */
+
+	private ArrayList<JMember> interfaceBody() { // needs modification as there can be no bodies to the methods.
+		ArrayList<JMember> members = new ArrayList<JMember>();
+		mustBe(LCURLY);
+		while (!see(RCURLY) && !see(EOF)) {
+			members.add(interfaceMemberDecl(modifiers()));
 		}
 		mustBe(RCURLY);
 		return members;
@@ -568,6 +644,63 @@ public class Parser {
 		return memberDecl;
 	}
 
+	
+	/**
+	 * Parse a interface member declaration.
+	 * 
+	 * <pre>
+	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+							formalParameters
+							SEMI
+						| type variableDeclarators SEMI // field
+	 * </pre>
+	 * 
+	 * @param mods the interface member modifiers.
+	 * @return an AST for a interfaceMemberDecl.
+	 */
+
+	private JMember interfaceMemberDecl(ArrayList<String> mods) {
+		int line = scanner.token().line();
+		JMember interfaceMemberDecl = null;
+		Type type = null;
+		if (have(VOID)) {
+			// void method
+			type = Type.VOID;
+			mustBe(IDENTIFIER);
+			String name = scanner.previousToken().image();
+			ArrayList<JFormalParameter> params = formalParameters();
+			JBlock body = null;
+			if (have(SEMI)) {
+				body = null;
+			} else {
+				reportParserError("Methods can not have bodies in interface declaration", scanner.token().image());
+			}
+			interfaceMemberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+		} else {
+			type = type();
+			if (seeIdentLParen()) {
+				// Non void method
+				mustBe(IDENTIFIER);
+				String name = scanner.previousToken().image();
+				ArrayList<JFormalParameter> params = formalParameters();
+				JBlock body = null;
+				if (have(SEMI)) {
+					body = null;
+				} else {
+					reportParserError("Methods can not have bodies in interface declaration", scanner.token().image());
+				}
+				interfaceMemberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+			} else {
+				// Field
+				interfaceMemberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
+				mustBe(SEMI);
+			}
+		}
+		
+		return interfaceMemberDecl;
+	}
+	
+	
 	/**
 	 * Parse a block.
 	 * 
