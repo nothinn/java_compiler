@@ -516,7 +516,8 @@ public class Parser {
 	 * Parse a member declaration.
 	 * 
 	 * <pre>
-	 *   memberDecl ::= IDENTIFIER            // constructor
+	 *   memberDecl ::= block 	   				// inner block
+	 * 				  | IDENTIFIER            // constructor
 	 *                    formalParameters
 	 *                    block
 	 *                | (VOID | type) IDENTIFIER  // method
@@ -532,7 +533,11 @@ public class Parser {
 	private JMember memberDecl(ArrayList<String> mods) {
 		int line = scanner.token().line();
 		JMember memberDecl = null;
-		if (seeIdentLParen()) {
+		
+		if(see(LCURLY)) {
+			JBlock body = block();
+			memberDecl = new JBlockInner(line, mods, body);
+		} else if (seeIdentLParen()) {
 			// A constructor
 			mustBe(IDENTIFIER);
 			String name = scanner.previousToken().image();
