@@ -268,7 +268,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JClassDeclaration line=\"%d\" name=\"%s\""
-                + " super=\"%s\" implements=\"%s\">\n", line(), name, superType.toString(), interfaceType.toString());
+                + " super=\"%s\" implements=\"%s\">\n", line(), name, superType.toString(), (interfaceType == null ? "null" : interfaceType.toString()));
         p.indentRight();
         if (context != null) {
             context.writeToStdOut(p);
