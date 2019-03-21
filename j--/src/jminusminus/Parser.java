@@ -990,13 +990,24 @@ public class Parser {
 		}
 	}
 
+	/**
+	 * Parse a conditional expression.
+	 * 
+	 * <pre>
+	 *   conditionalExpression ::= 
+	 *       conditionalOrExpression [ ? assignmentExpression : conditionalExpression]
+	 * </pre>
+	 * 
+	 * @return an AST for a conditionalExpression.
+	 */
+
 
 	private JExpression conditionalExpression(){
 		int line = scanner.token().line();
 		JExpression test = conditionalOrExpression();
 
 		if (have(CONDITIONAL_OP)){
-			JExpression consequent = conditionalExpression();
+			JExpression consequent = assignmentExpression();
 			mustBe(COLON);
 			JExpression alternate = conditionalExpression();
 			return new JConditionalExpression(line, test, consequent, alternate);
