@@ -518,10 +518,11 @@ public class Parser {
 	 * <pre>
 	 *   memberDecl ::= IDENTIFIER            // constructor
 	 *                    formalParameters
-	 *                    block
+	 *                    [THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}] block
 	 *                | (VOID | type) IDENTIFIER  // method
 	 *                    formalParameters
-	 *                    (block | SEMI)
+	 * 					  	[THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+	 *                    	  (block | SEMI)
 	 *                | type variableDeclarators SEMI
 	 * </pre>
 	 * 
@@ -532,13 +533,22 @@ public class Parser {
 	private JMember memberDecl(ArrayList<String> mods) {
 		int line = scanner.token().line();
 		JMember memberDecl = null;
+
+		ArrayList<TypeName> throwNames = null;
+
 		if (seeIdentLParen()) {
 			// A constructor
 			mustBe(IDENTIFIER);
 			String name = scanner.previousToken().image();
 			ArrayList<JFormalParameter> params = formalParameters();
+			if(have(THROWS)){
+				throwNames = new ArrayList<TypeName>();
+				do{
+					throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+				} while(have(COMMA));
+			}
 			JBlock body = block();
-			memberDecl = new JConstructorDeclaration(line, mods, name, params, body);
+			memberDecl = new JConstructorDeclaration(line, mods,throwNames, name, params, body);
 		} else {
 			Type type = null;
 			if (have(VOID)) {
@@ -547,8 +557,14 @@ public class Parser {
 				mustBe(IDENTIFIER);
 				String name = scanner.previousToken().image();
 				ArrayList<JFormalParameter> params = formalParameters();
+				if(have(THROWS)){
+					throwNames = new ArrayList<TypeName>();
+					do{
+						throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+					} while(have(COMMA));
+				}
 				JBlock body = have(SEMI) ? null : block();
-				memberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+				memberDecl = new JMethodDeclaration(line, mods,throwNames, name, type, params, body);
 			} else {
 				type = type();
 				if (seeIdentLParen()) {
@@ -556,8 +572,14 @@ public class Parser {
 					mustBe(IDENTIFIER);
 					String name = scanner.previousToken().image();
 					ArrayList<JFormalParameter> params = formalParameters();
+					if(have(THROWS)){
+						throwNames = new ArrayList<TypeName>();
+						do{
+							throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+						} while(have(COMMA));
+					}
 					JBlock body = have(SEMI) ? null : block();
-					memberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+					memberDecl = new JMethodDeclaration(line, mods, throwNames, name, type, params, body);
 				} else {
 					// Field
 					memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
@@ -615,6 +637,9 @@ public class Parser {
 	 *   statement ::= block
 	 *               | IF parExpression statement [ELSE statement]
 	 *               | WHILE parExpression statement 
+	 *   			 | try block
+     *       		   {CATCH ( formalParameter) block}
+	 * 					[FINALLY block] // If no CATCH block, this must be there.
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
@@ -636,6 +661,41 @@ public class Parser {
 			JExpression test = parExpression();
 			JStatement statement = statement();
 			return new JWhileStatement(line, test, statement);
+		} else if (have(TRY)){
+			JBlock mainBlock = block();
+			ArrayList<JFormalParameter> catchParams =null;
+			ArrayList<JBlock> catchBlocks = null;
+			JBlock finalBlock = null;
+			boolean hasCatch = false;
+
+			if(have(CATCH)){
+				catchParams = new ArrayList<JFormalParameter>();
+				catchBlocks = new ArrayList<JBlock>();	
+
+				hasCatch = true;
+				mustBe(LPAREN);
+				catchParams.add( formalParameter());
+				mustBe(RPAREN);
+				catchBlocks.add(block());
+
+					while(have(CATCH)){
+						mustBe(LPAREN);
+						catchParams.add( formalParameter());
+						mustBe(RPAREN);
+						catchBlocks.add(block());
+					}
+			}
+
+			if(hasCatch){
+				if(have(FINALLY)){
+					finalBlock = block();
+				}
+			}else{
+				mustBe(FINALLY);
+				finalBlock = block();
+			}
+			return new JExceptionStatement(line, mainBlock,catchParams,catchBlocks,finalBlock);
+
 		} else if (have(RETURN)) {
 			if (have(SEMI)) {
 				return new JReturnStatement(line, null);
