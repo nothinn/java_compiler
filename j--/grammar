@@ -36,8 +36,8 @@ memberDecl ::= [STATIC] block         // inner block
              | type variableDeclarators SEMI // field
              
 interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
-							formalParameters
-							SEMI
+							formalParameters 
+							[THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}] SEMI
 						| type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 

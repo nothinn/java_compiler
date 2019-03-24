@@ -702,6 +702,12 @@ public class Parser {
 			String name = scanner.previousToken().image();
 			ArrayList<JFormalParameter> params = formalParameters();
 			JBlock body = null;
+			if(have(THROWS)){
+				throwNames = new ArrayList<TypeName>();
+				do{
+					throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+				} while(have(COMMA));
+			}
 			if (have(SEMI)) {
 				body = null;
 			} else {
@@ -716,6 +722,12 @@ public class Parser {
 				String name = scanner.previousToken().image();
 				ArrayList<JFormalParameter> params = formalParameters();
 				JBlock body = null;
+				if(have(THROWS)){
+					throwNames = new ArrayList<TypeName>();
+					do{
+						throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+					} while(have(COMMA));
+				}
 				if (have(SEMI)) {
 					body = null;
 				} else {
