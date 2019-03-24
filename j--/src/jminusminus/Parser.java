@@ -613,11 +613,9 @@ public class Parser {
 
 		ArrayList<TypeName> throwNames = null;
 
-		if (seeIdentLParen()) {
-		
 		if(see(LCURLY)) {
 			JBlock body = block();
-			memberDecl = new JBlockInner(line, mods, body);
+			memberDecl = new JBlockInner(line, mods, body); //TODO Is this the correct place?
 		} else if (seeIdentLParen()) {
 			// A constructor
 			mustBe(IDENTIFIER);
@@ -669,7 +667,6 @@ public class Parser {
 				}
 			}
 		}
-	}
 		return memberDecl;
 	}
 
