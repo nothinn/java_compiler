@@ -35,6 +35,7 @@ statement ::= block
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
+            | FOR LPAREN [forInit] SEMI [expression] SEMI [forUpdate] | forInit COLON referenceType RPAREN statement
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]
@@ -43,6 +44,11 @@ formalParameters ::= LPAREN
 formalParameter ::= type IDENTIFIER
 
 parExpression ::= LPAREN expression RPAREN
+
+forInit ::= statementExpression {COMMA statementExpression}
+             | type variableDeclarators
+
+forUpdate ::= statementExpression {COMMA statementExpression}
 
 localVariableDeclarationStatement ::= type variableDeclarators SEMI
 

@@ -618,6 +618,7 @@ public class Parser {
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
+     *               | FOR parExpression statement
 	 * </pre>
 	 * 
 	 * @return an AST for a statement.
@@ -646,12 +647,70 @@ public class Parser {
 			}
 		} else if (have(SEMI)) {
 			return new JEmptyStatement(line);
-		} else { // Must be a statementExpression
-			JStatement statement = statementExpression();
-			mustBe(SEMI);
-			return statement;
-		}
+        } else if (have(FOR)){                               //for
+            mustBe(LPAREN);                                   //(
+            ArrayList<JVariableDeclarator> init = forInit();
+            if(have(COLON)){             // enhanced for loop 
+                
+                Type tp = type();
+                mustBe(RPAREN);
+                JStatement stat = statement();      // body of loop
+                return new JEnhancedForStatement(line,init,tp,stat);
+            }
+            mustBe(SEMI);
+            JExpression condition = expression();          //i<10;
+            mustBe(SEMI);
+            ArrayList<JStatement> update = forUpdate();
+            mustBe(RPAREN);
+            JStatement statement = statement();      // body of loop
+            return new JForStatement(line,init,condition,update,statement);
+         
+        } else { // Must be a statementExpression
+            JStatement statement = statementExpression();
+            mustBe(SEMI);
+            return statement;
+        }
+        
 	}
+
+    /** 
+     * Parse forInit parameters.
+     *<pre>
+     * forInit ::= statementExpression {, statementExpression}
+             | type variableDeclarators
+     *</pre>
+     *
+     **/
+   private ArrayList<JVariableDeclarator> forInit(){
+		ArrayList<JVariableDeclarator> parameters = new ArrayList<JVariableDeclarator>();
+        do{
+                    parameters.add(variableDeclarator(type()));  //int i=0;
+            
+        }while(have(COMMA));  
+         
+        return parameters;
+    }
+
+       
+    
+   
+   /** 
+     * Parse forUpdate parameters.
+     *<pre>
+     * forUpdate ::= statementExpression {, statementExpression}
+     *</pre>
+     *
+     **/
+   private ArrayList<JStatement> forUpdate(){
+		ArrayList<JStatement> parameters = new ArrayList<JStatement>();
+        do{
+                parameters.add(statementExpression());
+        }while(have(COMMA));  
+         
+        return parameters;
+        
+    }
+
 
 	/**
 	 * Parse formal parameters.
@@ -1166,7 +1225,6 @@ public class Parser {
 		}
 		return lhs;
 	}
-
 
 
 	/**
