@@ -381,15 +381,30 @@ public class Parser {
 	 * Parse a type declaration.
 	 * 
 	 * <pre>
-	 *   typeDeclaration ::= modifiers classDeclaration
+	 *   typeDeclaration ::= ((modifiers classDeclaration) | ([PUBLIC] interfaceDeclaration))
 	 * </pre>
 	 * 
 	 * @return an AST for a typeDeclaration.
 	 */
 
 	private JAST typeDeclaration() {
-		ArrayList<String> mods = modifiers();
-		return classDeclaration(mods);
+		ArrayList<String> mods = new ArrayList<String>();
+		if (have(PUBLIC)) {
+			mods.add("public");
+			if (see(INTERFACE)) {
+				return interfaceDeclaration(mods);
+			}else if (see(CLASS)){
+				return classDeclaration(mods);
+			}else {
+				mods.addAll(modifiers());
+				return classDeclaration(mods);
+			}
+		}else if(see(INTERFACE)) {
+			return interfaceDeclaration(mods);
+		}else {
+			mods = modifiers(); 
+			return classDeclaration(mods); // if we have seen other modifers then public we will go to class declaration which will catch an error if it sees INTERFACE
+		}
 	}
 
 	/**
@@ -465,8 +480,9 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   classDeclaration ::= CLASS IDENTIFIER 
-	 *                        [EXTENDS qualifiedIdentifier] 
-	 *                        classBody
+                       			[EXTENDS qualifiedIdentifier]
+			                    [IMPLEMENTS qualifiedIdentifier] //change has to be implemented
+			                    classBody
 	 * </pre>
 	 * 
 	 * A class which doesn't explicitly extend another (super) class implicitly
@@ -476,18 +492,24 @@ public class Parser {
 	 * @return an AST for a classDeclaration.
 	 */
 
-	private JClassDeclaration classDeclaration(ArrayList<String> mods) {
+	private JClassDeclaration classDeclaration(ArrayList<String> mods) { //have to be modified to suppoert IMPLMENTS
 		int line = scanner.token().line();
 		mustBe(CLASS);
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		Type superClass;
+		Type implmentInterface;
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
-		return new JClassDeclaration(line, mods, name, superClass, classBody());
+		if (have(IMPLEMENTS)) {
+			implmentInterface = qualifiedIdentifier();
+		} else {
+			implmentInterface = null;
+		}
+		return new JClassDeclaration(line, mods, name, superClass, implmentInterface, classBody());
 	}
 
 	/**
@@ -511,17 +533,73 @@ public class Parser {
 		mustBe(RCURLY);
 		return members;
 	}
+	
+	
+	/**
+	 * Parse a interface declaration.
+	 * 
+	 * <pre>
+	 *   interfaceDeclaration ::= INTERFACE IDENTIFIER 
+	 *                        [EXTENDS qualifiedIdentifier] 
+	 *                        interfaceBody
+	 * </pre>
+	 * 
+	 * A class which doesn't explicitly extend another (super) class implicitly - Dont know if this is equivelent with interfaces
+	 * extends the superclass java.lang.Object.
+	 * 
+	 * @param mods the public modifiers.
+	 * @return an AST for a InterfaceDeclaration.
+	 */
+
+	private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods) {
+		int line = scanner.token().line();
+		mustBe(INTERFACE);
+		mustBe(IDENTIFIER);
+		String name = scanner.previousToken().image();
+		Type superInterface;						//must be implemented
+		if (have(EXTENDS)) {
+			superInterface = qualifiedIdentifier();
+		} else {
+			superInterface = Type.OBJECT;
+		}
+		return new JInterfaceDeclaration(line, mods, name, superInterface, interfaceBody());
+	}
+	
+	
+	/**
+	 * Parse a interface body.
+	 * 
+	 * <pre>
+	 *   classBody ::= LCURLY
+	 *                   {modifiers interfaceMemberDecl}
+	 *                 RCURLY
+	 * </pre>
+	 * 
+	 * @return list of members in the interface body.
+	 */
+
+	private ArrayList<JMember> interfaceBody() { // needs modification as there can be no bodies to the methods.
+		ArrayList<JMember> members = new ArrayList<JMember>();
+		mustBe(LCURLY);
+		while (!see(RCURLY) && !see(EOF)) {
+			members.add(interfaceMemberDecl(modifiers()));
+		}
+		mustBe(RCURLY);
+		return members;
+	}
 
 	/**
 	 * Parse a member declaration.
 	 * 
 	 * <pre>
-	 *   memberDecl ::= IDENTIFIER            // constructor
+	 *   memberDecl ::= [STATIC] block 	   		// inner block
+	 * 				  | IDENTIFIER            // constructor
 	 *                    formalParameters
-	 *                    block
+	 *                    [THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}] block
 	 *                | (VOID | type) IDENTIFIER  // method
 	 *                    formalParameters
-	 *                    (block | SEMI)
+	 * 					  	[THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+	 *                    	  (block | SEMI)
 	 *                | type variableDeclarators SEMI
 	 * </pre>
 	 * 
@@ -532,13 +610,25 @@ public class Parser {
 	private JMember memberDecl(ArrayList<String> mods) {
 		int line = scanner.token().line();
 		JMember memberDecl = null;
-		if (seeIdentLParen()) {
+
+		ArrayList<TypeName> throwNames = null;
+
+		if(see(LCURLY)) {
+			JBlock body = block();
+			memberDecl = new JBlockInner(line, mods, body); //TODO Is this the correct place?
+		} else if (seeIdentLParen()) {
 			// A constructor
 			mustBe(IDENTIFIER);
 			String name = scanner.previousToken().image();
 			ArrayList<JFormalParameter> params = formalParameters();
+			if(have(THROWS)){
+				throwNames = new ArrayList<TypeName>();
+				do{
+					throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+				} while(have(COMMA));
+			}
 			JBlock body = block();
-			memberDecl = new JConstructorDeclaration(line, mods, name, params, body);
+			memberDecl = new JConstructorDeclaration(line, mods,throwNames, name, params, body);
 		} else {
 			Type type = null;
 			if (have(VOID)) {
@@ -547,8 +637,14 @@ public class Parser {
 				mustBe(IDENTIFIER);
 				String name = scanner.previousToken().image();
 				ArrayList<JFormalParameter> params = formalParameters();
+				if(have(THROWS)){
+					throwNames = new ArrayList<TypeName>();
+					do{
+						throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+					} while(have(COMMA));
+				}
 				JBlock body = have(SEMI) ? null : block();
-				memberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+				memberDecl = new JMethodDeclaration(line, mods,throwNames, name, type, params, body);
 			} else {
 				type = type();
 				if (seeIdentLParen()) {
@@ -556,8 +652,14 @@ public class Parser {
 					mustBe(IDENTIFIER);
 					String name = scanner.previousToken().image();
 					ArrayList<JFormalParameter> params = formalParameters();
+					if(have(THROWS)){
+						throwNames = new ArrayList<TypeName>();
+						do{
+							throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+						} while(have(COMMA));
+					}
 					JBlock body = have(SEMI) ? null : block();
-					memberDecl = new JMethodDeclaration(line, mods, name, type, params, body);
+					memberDecl = new JMethodDeclaration(line, mods, throwNames, name, type, params, body);
 				} else {
 					// Field
 					memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
@@ -568,6 +670,78 @@ public class Parser {
 		return memberDecl;
 	}
 
+	
+	/**
+	 * Parse a interface member declaration.
+	 * 
+	 * <pre>
+	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+							formalParameters
+							SEMI
+						| type variableDeclarators SEMI // field
+	 * </pre>
+	 * 
+	 * @param mods the interface member modifiers.
+	 * @return an AST for a interfaceMemberDecl.
+	 */
+
+	private JMember interfaceMemberDecl(ArrayList<String> mods) {
+		int line = scanner.token().line();
+		JMember interfaceMemberDecl = null;
+		Type type = null;
+
+		ArrayList<TypeName> throwNames = null;
+
+		if (have(VOID)) {
+			// void method
+			type = Type.VOID;
+			mustBe(IDENTIFIER);
+			String name = scanner.previousToken().image();
+			ArrayList<JFormalParameter> params = formalParameters();
+			JBlock body = null;
+			if(have(THROWS)){
+				throwNames = new ArrayList<TypeName>();
+				do{
+					throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+				} while(have(COMMA));
+			}
+			if (have(SEMI)) {
+				body = null;
+			} else {
+				reportParserError("Methods can not have bodies in interface declaration", scanner.token().image());
+			}
+			interfaceMemberDecl = new JMethodDeclaration(line, mods, throwNames, name, type, params, body);
+		} else {
+			type = type();
+			if (seeIdentLParen()) {
+				// Non void method
+				mustBe(IDENTIFIER);
+				String name = scanner.previousToken().image();
+				ArrayList<JFormalParameter> params = formalParameters();
+				JBlock body = null;
+				if(have(THROWS)){
+					throwNames = new ArrayList<TypeName>();
+					do{
+						throwNames.add(qualifiedIdentifier()); //Has to read an identifier first time.
+					} while(have(COMMA));
+				}
+				if (have(SEMI)) {
+					body = null;
+				} else {
+					reportParserError("Methods can not have bodies in interface declaration", scanner.token().image());
+				}
+				interfaceMemberDecl = new JMethodDeclaration(line, mods, throwNames,name, type, params, body);
+			} else {
+				// Field
+				interfaceMemberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
+				mustBe(SEMI);
+			}
+		}
+		
+		return interfaceMemberDecl;
+	}
+	
+	
 	/**
 	 * Parse a block.
 	 * 
@@ -615,6 +789,9 @@ public class Parser {
 	 *   statement ::= block
 	 *               | IF parExpression statement [ELSE statement]
 	 *               | WHILE parExpression statement 
+	 *   			 | try block
+     *       		   {CATCH ( formalParameter) block}
+	 * 					[FINALLY block] // If no CATCH block, this must be there.
 	 *               | RETURN [expression] SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
@@ -637,6 +814,41 @@ public class Parser {
 			JExpression test = parExpression();
 			JStatement statement = statement();
 			return new JWhileStatement(line, test, statement);
+		} else if (have(TRY)){
+			JBlock mainBlock = block();
+			ArrayList<JFormalParameter> catchParams =null;
+			ArrayList<JBlock> catchBlocks = null;
+			JBlock finalBlock = null;
+			boolean hasCatch = false;
+
+			if(have(CATCH)){
+				catchParams = new ArrayList<JFormalParameter>();
+				catchBlocks = new ArrayList<JBlock>();	
+
+				hasCatch = true;
+				mustBe(LPAREN);
+				catchParams.add( formalParameter());
+				mustBe(RPAREN);
+				catchBlocks.add(block());
+
+					while(have(CATCH)){
+						mustBe(LPAREN);
+						catchParams.add( formalParameter());
+						mustBe(RPAREN);
+						catchBlocks.add(block());
+					}
+			}
+
+			if(hasCatch){
+				if(have(FINALLY)){
+					finalBlock = block();
+				}
+			}else{
+				mustBe(FINALLY);
+				finalBlock = block();
+			}
+			return new JExceptionStatement(line, mainBlock,catchParams,catchBlocks,finalBlock);
+
 		} else if (have(RETURN)) {
 			if (have(SEMI)) {
 				return new JReturnStatement(line, null);
@@ -1031,7 +1243,7 @@ public class Parser {
 
 	private JExpression assignmentExpression() {
 		int line = scanner.token().line();
-		JExpression lhs = conditionalOrExpression();
+		JExpression lhs = conditionalExpression();
 		if (have(ASSIGN)) {
 			return new JAssignOp(line, lhs, assignmentExpression());
 		} else if (have(PLUS_ASSIGN)) {
@@ -1048,6 +1260,32 @@ public class Parser {
 			return lhs;
 		}
 	}
+
+	/**
+	 * Parse a conditional expression.
+	 * 
+	 * <pre>
+	 *   conditionalExpression ::= 
+	 *       conditionalOrExpression [ ? assignmentExpression : conditionalExpression]
+	 * </pre>
+	 * 
+	 * @return an AST for a conditionalExpression.
+	 */
+
+
+	private JExpression conditionalExpression(){
+		int line = scanner.token().line();
+		JExpression test = conditionalOrExpression();
+
+		if (have(CONDITIONAL_OP)){
+			JExpression consequent = assignmentExpression();
+			mustBe(COLON);
+			JExpression alternate = conditionalExpression();
+			return new JConditionalExpression(line, test, consequent, alternate);
+		}
+		return test;
+	}	
+
     /**
 	 * Parse a conditional-or expression.
 	 * 

@@ -15,6 +15,9 @@ class JMethodDeclaration
     /** Method modifiers. */
     protected ArrayList<String> mods;
 
+    /** Exception names. */
+    protected ArrayList<TypeName> exceptions;
+
     /** Method name. */
     protected String name;
 
@@ -63,12 +66,13 @@ class JMethodDeclaration
      */
 
     public JMethodDeclaration(int line, ArrayList<String> mods,
-        String name, Type returnType,
+        ArrayList<TypeName> exceptions, String name, Type returnType,
         ArrayList<JFormalParameter> params, JBlock body)
 
     {
         super(line);
         this.mods = mods;
+        this.exceptions = exceptions;
         this.name = name;
         this.returnType = returnType;
         this.params = params;
@@ -243,6 +247,15 @@ class JMethodDeclaration
                 p.indentLeft();
             }
             p.println("</FormalParameters>");
+        }
+        if (exceptions != null){
+            p.println("<Exceptions>");
+            p.indentRight();
+            for (TypeName exception : exceptions) {
+                p.printf("<Exception name=\"%s\"/>\n", exception);
+            }
+            p.indentLeft();
+            p.println("</ExceptionNames>");
         }
         if (body != null) {
             p.println("<Body>");
