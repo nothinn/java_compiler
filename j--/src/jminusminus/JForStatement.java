@@ -63,7 +63,6 @@ class JForStatement extends JStatement {
     }
     
     public void writeToStdOut(PrettyPrinter p){
-        p.printf("===========================================\n");
         p.printf("<JForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Declaration>\n");
@@ -83,7 +82,6 @@ class JForStatement extends JStatement {
         body.writeToStdOut(p);
         p.printf("</BodyStatement>\n");
         p.printf("</JForStatement>\n");
-        p.printf("===========================================\n");
     }
 
 }
