@@ -142,20 +142,42 @@ SKIP: {" "|"\t"|"\n"|"\r"|"\f"}
 // Single line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
 
+// Multi line comments -- ignored
+SKIP: { "/*" : MULTI_LINE_COMMENT }
+<MULTI_LINE_COMMENT> SKIP : { < ~[]>  |  "*/" : DEFAULT }
+
 // Reserved words
 TOKEN:
 {
   < ABSTRACT: "abstract" >
 | < BOOLEAN: "boolean" >
+| < BREAK: "break" >
+| < BYTE: "byte" >
+| < CASE: "case" >
+| < CATCH: "catch" >
 | < CHAR: "char" >
 | < CLASS: "class" >
+| < CONST: "const" >
+| < CONTINUE: "continue" >
+| < _DEFAULT: "default" >
+| < DO: "do" >
+| < DOUBLE: "double" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
+| < FINAL: "final">
+| < FINALLY: "finally">
+| < FLOAT: "float">
+| < FOR: "for">
+| < GOTO: "goto">
 | < IF: "if" >
+| < IMPLEMENTS: "implements">
 | < IMPORT: "import" >
 | < INSTANCEOF: "instanceof" >
 | < INT: "int" >
+| < INTERFACE: "interface">
+| < LONG: "long">
+| < NATIVE: "native">
 | < NEW: "new" >
 | < NULL: "null" >
 | < PACKAGE: "package">
@@ -163,29 +185,63 @@ TOKEN:
 | < PROTECTED: "protected" >
 | < PUBLIC: "public" >
 | < RETURN: "return" >
+| < SHORT: "short">
 | < STATIC: "static" >
+| < STRICTFP: "strictfp">
 | < SUPER: "super" >
+| < SWITCH: "switch">
+| < SYNCHRONIZED: "synchronized">
 | < THIS: "this" >
+| < THROW: "throw">
+| < THROWs: "throws">
+| < TRANSIENT: "transient">
+| < TRY: "try">
 | < TRUE: "true" >
 | < VOID: "void" >
+| < VOLATILE: "volatile">
 | < WHILE: "while" >
 }
 
 // Operators (these could be combined with the reserved words)
 TOKEN:
 {
-  < PLUS: "+" >
-| < ASSIGN: "=" >
+  < ASSIGN: "=" >
 | < DEC: "--" >
 | < EQUAL: "==" >
+| < NOT_EQUAL: "!=" >
+| < CONDITIONAL_OP: "?" >
+| < DIV: "/" >
+| < GE: ">=" >
 | < GT: ">" >
 | < INC: "++" >
 | < LAND: "&&" >
 | < LE: "<=" >
 | < LNOT: "!" >
+| < LOR: "||" >
+| < LT: "<" >
 | < MINUS: "-" >
-| < PLUS_ASSIGN: "+=" >
 | < STAR: "*" >
+| < PLUS: "+" >
+| < REM: "%" >
+| < PLUS_ASSIGN: "+=" >
+| < MINUS_ASSIGN: "-=" >
+| < DIV_ASSIGN: "/=" >
+| < MULT_ASSIGN: "*=" >
+| < REM_ASSIGN: "%=" >
+| < SR_ASSIGN: ">>=" >
+| < SL_ASSIGN: "<<=" > 
+| < SRL_ASSIGN: ">>>=" > 
+| < BWAND_ASSIGN: "&=" >
+| < BWXOR_ASSIGN: "^=" >
+| < BWOR_ASSIGN: "|=" >
+| < SL: "<<" >
+| < SR: ">>" >
+| < SRL: ">>>" >
+| < BWAND: "&" >
+| < BWXOR: "^" >
+| < BWOR: "|" >
+| < UC: "~">
+
 }
 
 // Separators (these could be combined with the reserved words)
@@ -200,6 +256,7 @@ TOKEN:
 | < SEMI: ";" >
 | < COMMA: "," >
 | < DOT: "." >
+| < COLON: ":" > 
 }
 
 // Identifiers
@@ -216,7 +273,11 @@ TOKEN:
 {
   < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
-| < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >   
+| < DOUBLE_LITERAL: (("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) (".") <DIGIT> (<DIGIT>)*) | "." <DIGIT> (<DIGIT>)* >
+| < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" > 
+| < FLOAT_LITERAL: <DOUBLE_LITERAL> "f" >
+| < LONG_LITERAL: <INT_LITERAL> "L" >
+
 | < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
 }
 
@@ -447,6 +508,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
+    Type implmentInterface = null;
 }
 {
     try {
@@ -461,8 +523,8 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { 
-        return new JClassDeclaration( line, mods, 
-            name, superClass, classBody ); 
+        return new JClassDeclaration( line, mods,
+            name, superClass,implmentInterface, classBody ); 
     }
 }
 
@@ -507,6 +569,7 @@ private ArrayList<JMember> classBody(): {
  *                    block
  *                | (VOID | type) IDENTIFIER  // method
  *                    formalParameters
+ *                    [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
  *                    (block | SEMI)
  *                | type variableDeclarators SEMI 
  * </pre>
@@ -523,6 +586,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
     JMember memberDecl = null;
+    ArrayList<TypeName> throwNames = null;
 }
 {
     try {
@@ -537,7 +601,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             body = block()
             { 
                 memberDecl = 
-                new JConstructorDeclaration( line, mods, 
+                new JConstructorDeclaration( line, mods, throwNames,
                                              name, params, body );
             }
         ) |     
@@ -556,7 +620,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             )
             { 
                 memberDecl = 
-                   new JMethodDeclaration( line, mods, name, 
+                   new JMethodDeclaration( line, mods, throwNames, name, 
                                            type, params, body ); 
             } 
         ) | 
@@ -1296,7 +1360,7 @@ private JExpression additiveExpression(): {
  * 
  * <pre>
  *   multiplicativeExpression ::= unaryExpression  // level 2
- *                                  {STAR unaryExpression}
+ *                                  {(STAR | DIV | REM)unaryExpression}
  * </pre>
  * 
  * @return an AST for a multiplicativeExpression.
