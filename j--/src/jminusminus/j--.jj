@@ -533,7 +533,9 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
  * 
  * <pre>
  *   classBody ::= LCURLY
- *                   {modifiers memberDecl}
+*                   {
+                        modifiers memberDecl
+                    }
  *                 RCURLY
  * </pre>
  * 
@@ -548,8 +550,7 @@ private ArrayList<JMember> classBody(): {
 {
     try {
         <LCURLY>
-        ( 
-            mods = modifiers()
+        (
             aMember = memberDecl( mods ) { members.add( aMember ); } 
         )*
         <RCURLY>
@@ -561,22 +562,23 @@ private ArrayList<JMember> classBody(): {
 }
 
 /**
- * Parse a member declaration.
- * 
- * <pre>
- *   memberDecl ::= IDENTIFIER            // constructor
- *                    formalParameters
- *                    block
- *                | (VOID | type) IDENTIFIER  // method
- *                    formalParameters
- *                    [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
- *                    (block | SEMI)
- *                | type variableDeclarators SEMI 
- * </pre>
- * 
- * @param mods the class member modifiers.
- * @return an AST for a memberDecl.
- */
+* Parse a member declaration.
+* 
+* <pre>
+*   memberDecl ::= [STATIC] block 	   		// inner block
+* 				  | IDENTIFIER            // constructor
+*                    formalParameters
+*                    [THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}] block
+*                | (VOID | type) IDENTIFIER  // method
+*                    formalParameters
+* 					  	[THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+*                    	  (block | SEMI)
+*                | type variableDeclarators SEMI
+* </pre>
+* 
+* @param mods the class member modifiers.
+* @return an AST for a memberDecl.
+*/
     
 private JMember memberDecl( ArrayList<String>  mods ): {
     int line = 0;
@@ -590,6 +592,17 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 }
 {
     try {
+        
+        (
+            mods = modifiers()
+            body = block()
+            
+            {line =token.beginLine;}
+            {
+                memberDecl = 
+                new JBlockInner(line, mods,body);
+            }
+        )|
         LOOKAHEAD( <IDENTIFIER> <LPAREN> )
         (
             <IDENTIFIER> 
