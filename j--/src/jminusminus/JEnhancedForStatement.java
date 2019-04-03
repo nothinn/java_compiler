@@ -60,7 +60,7 @@ class JEnhancedForStatement extends JStatement {
     }
     
     public void writeToStdOut(PrettyPrinter p){
-        p.printf("<JForStatement line=\"%d\">\n", line());
+        p.printf("<JEnhancedForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Declaration>\n");
         for(JVariableDeclarator i: declaration){
@@ -73,7 +73,7 @@ class JEnhancedForStatement extends JStatement {
         p.printf("<BodyStatement>\n");
         body.writeToStdOut(p);
         p.printf("</BodyStatement>\n");
-        p.printf("</JForStatement>\n");
+        p.printf("</JEnhancedForStatement>\n");
     }
 
 }

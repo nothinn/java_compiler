@@ -719,6 +719,7 @@ private JStatement blockStatement(): {
  *               | RETURN [expression] SEMI
  *               | SEMI 
  *               | statementExpression SEMI
+ *               | FOR parExpression statement
  * </pre>
  * 
  * @return an AST for a statement.
@@ -727,11 +728,15 @@ private JStatement blockStatement(): {
 private JStatement statement(): {
     int line = 0;
     JStatement statement = null;
+    JStatement stat = null;
     JExpression test = null;
     JStatement consequent = null;
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+    JExpression condition = null;
+    Type tp = null;
+    ArrayList<JStatement> update;
 }
 {       
     try {
@@ -764,13 +769,81 @@ private JStatement statement(): {
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
         statement = statementExpression() 
+        <SEMI> |
+
+
+        <FOR> <LPAREN>
+        { line = token.beginLine; }
+        {ArrayList<JVariableDeclarator> init = forInit();}
+
+        [<COLON>
+        tp = type()
+        <RPAREN>
+        stat = statement()
+        {return new JEnhancedForStatement(line,init,tp,stat);}
+        ]
         <SEMI>
+        condition = expression()
+        <SEMI>
+        update = forUpdate()
+        <RPAREN>
+        statement = statement()
+        {return new JForStatement(line,init,condition,update,statement);}
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return statement; }
 }
+
+/** 
+* Parse forInit parameters.
+*<pre>
+* forInit ::= statementExpression {, statementExpression}
+*        | type variableDeclarators
+*</pre>
+*
+**/
+
+private ArrayList<JVariableDeclarator> forInit(): {
+    ArrayList<JVariableDeclarator> parameters = new ArrayList<JVariableDeclarator>();
+}
+{
+       try{
+           {parameters.add(variableDeclarator(type()));}
+           (<COMMA> {parameters.add(variableDeclarator(type()));})*
+       }
+       catch(ParseException e){
+           recoverFromError(new int[] {SEMI, EOF},e);
+       }
+       {
+           return parameters;
+       }
+}
+
+
+   /** 
+     * Parse forUpdate parameters.
+     *<pre>
+     * forUpdate ::= statementExpression {, statementExpression}
+     *</pre>
+     *
+     **/
+   private ArrayList<JStatement> forUpdate():{
+		ArrayList<JStatement> parameters = new ArrayList<JStatement>();
+   }
+   {
+       try{
+        {parameters.add(statementExpression());}
+        (<COMMA> {parameters.add(statementExpression());})*
+         
+    }catch(ParseException e){
+        recoverFromError(new int[]{SEMI,EOF},e);
+    }
+    {
+        return parameters;
+    }
+   }
 
 /**
  * Parse formal parameters.
