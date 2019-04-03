@@ -1206,7 +1206,7 @@ private JExpression expression(): {
  * 
  * <pre>
  *   assignmentExpression ::= 
- *       conditionalAndExpression // level 13
+ *       conditionalExpression // level 13
  *           [( ASSIGN  // conditionalExpression
  *            | PLUS_ASSIGN // must be valid lhs
  *            )
@@ -1222,7 +1222,7 @@ private JExpression assignmentExpression(): {
 }
 {
     try {
-        lhs = conditionalAndExpression() { line = lhs.line(); }
+        lhs = conditionalExpression() { line = lhs.line(); }
         [       
             <ASSIGN> 
             rhs = assignmentExpression()
@@ -1267,6 +1267,38 @@ private JExpression conditionalAndExpression(): {
     }
     { return lhs; }
 }
+
+/**
+* Parse a conditional expression.
+* 
+* <pre>
+*   conditionalExpression ::= 
+*       conditionalAndExpression [ ? assignmentExpression : conditionalExpression]
+* </pre>
+* 
+* @return an AST for a conditionalExpression.
+*/
+
+private JExpression conditionalExpression(): {
+    int line = 0;
+    JExpression test = null, consequent = null, alternate = null;
+}
+{
+    try {
+        test = conditionalAndExpression() { line = test.line(); }
+        (
+            <CONDITIONAL_OP>
+            consequent = assignmentExpression()
+            <COLON>
+            alternate = conditionalExpression()
+            { test = new JConditionalExpression(line, test, consequent, alternate); }
+        )*
+    } catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return test; }
+}	
+
 
 /**
  * Parse an equality expression.
