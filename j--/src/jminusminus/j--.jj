@@ -551,6 +551,7 @@ private ArrayList<JMember> classBody(): {
     try {
         <LCURLY>
         (
+            mods = modifiers()
             aMember = memberDecl( mods ) { members.add( aMember ); } 
         )*
         <RCURLY>
@@ -594,7 +595,6 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     try {
         
         (
-            mods = modifiers()
             body = block()
             
             {line =token.beginLine;}
