@@ -1195,6 +1195,10 @@ private JExpression expression(): {
  *       conditionalAndExpression // level 13
  *           [( ASSIGN  // conditionalExpression
  *            | PLUS_ASSIGN // must be valid lhs
+ *            | MINUS_ASSIGN 
+ *            | DIV_ASSIGN
+ *            | MULT_ASSIGN 
+ *            | REM_ASSIGN 
  *            )
  *            assignmentExpression]
  * </pre>
@@ -1216,7 +1220,48 @@ private JExpression assignmentExpression(): {
             <PLUS_ASSIGN>
             rhs = assignmentExpression()
             { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            <MINUS_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JMinusAssignOp( line, lhs, rhs ); }
+            <MULT_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JMultAssignOp( line, lhs, rhs ); }
+            <DIV_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JDivAssignOp( line, lhs, rhs ); }
+            <REM_ASSIGN>
+            rhs = assignmentExpression()
+            { lhs = new JRemAssignOp( line, lhs, rhs ); }
         ]
+    } 
+    catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse a conditional-or expression.
+ * 
+ * <pre>
+ *   conditionalOrExpression ::= conditionalAndExpression // level 11
+ *                                  {LOR conditionalAndExpression}
+ * </pre>
+ * 
+ * @return an AST for a conditionalExpression.
+ */
+
+private JExpression conditionalOrExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = conditionalAndExpression() { line = lhs.line(); }
+        ( 
+            <LOR>
+            { lhs = new JLogicalOrOp( line, lhs, conditionalAndExpression()); }
+        )*
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1390,6 +1435,7 @@ private JExpression multiplicativeExpression(): {
  * 
  * <pre>
  *   unaryExpression ::= INC unaryExpression // level 1
+ *                     | DEC unaryExpression
  *                     | MINUS unaryExpression
  *                     | simpleUnaryExpression
  * </pre>
@@ -1406,6 +1452,9 @@ private JExpression unaryExpression(): {
         <INC> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JPreIncrementOp( line, unaryExpr ); } | 
+        <DEC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JPreDecrementOp( line, unaryExpr ); } | 
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JNegateOp( line, unaryExpr ); } |
@@ -1486,7 +1535,11 @@ private JExpression postfixExpression(): {
         ( 
             <DEC> 
             { primaryExpr = 
-                new JPostDecrementOp( line, primaryExpr ); } 
+                new JPostDecrementOp( line, primaryExpr ); } |
+             
+            <INC> 
+            { primaryExpr = 
+                new JPostIncrementOp( line, primaryExpr ); } 
         )*
     } 
     catch ( ParseException e ) {
