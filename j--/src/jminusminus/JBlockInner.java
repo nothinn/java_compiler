@@ -44,7 +44,7 @@ class JBlockInner extends JBlock implements JMember {
         this.statements = body.statements();
         this.mods = mods;
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
-        this.isStatic = mods.contains("static");
+        this.isStatic = mods == null ? false :  mods.contains("static");
     }
 
     /**

@@ -202,6 +202,14 @@
     </target>
     
     <!-- 
+    runJavaCC:                               
+    -->
+    <target name="jCC"
+        depends="javacc,compileJavaCC,compileSPIM,jar">
+        <echo message=
+            "Compiling and running j-- (JVM) programs using JavaCC frontend..."/>
+    </target>
+    <!-- 
     runCompilerTestsJavaCC: Same as run compilerTests, but using 
     JavaCC frontend.                                 
     -->

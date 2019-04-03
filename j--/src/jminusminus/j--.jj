@@ -273,7 +273,7 @@ TOKEN:
 {
   < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
-| < DOUBLE_LITERAL: (("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) (".") <DIGIT> (<DIGIT>)*) | "." <DIGIT> (<DIGIT>)* >
+| < DOUBLE_LITERAL: ((("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) (".") <DIGIT> (<DIGIT>)*) | "." <DIGIT> (<DIGIT>)* )["D"]>
 | < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" > 
 | < FLOAT_LITERAL: <DOUBLE_LITERAL> "f" >
 | < LONG_LITERAL: <INT_LITERAL> "L" >
@@ -533,7 +533,9 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
  * 
  * <pre>
  *   classBody ::= LCURLY
- *                   {modifiers memberDecl}
+*                   {
+                        modifiers memberDecl
+                    }
  *                 RCURLY
  * </pre>
  * 
@@ -548,7 +550,7 @@ private ArrayList<JMember> classBody(): {
 {
     try {
         <LCURLY>
-        ( 
+        (
             mods = modifiers()
             aMember = memberDecl( mods ) { members.add( aMember ); } 
         )*
@@ -561,22 +563,23 @@ private ArrayList<JMember> classBody(): {
 }
 
 /**
- * Parse a member declaration.
- * 
- * <pre>
- *   memberDecl ::= IDENTIFIER            // constructor
- *                    formalParameters
- *                    block
- *                | (VOID | type) IDENTIFIER  // method
- *                    formalParameters
- *                    [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
- *                    (block | SEMI)
- *                | type variableDeclarators SEMI 
- * </pre>
- * 
- * @param mods the class member modifiers.
- * @return an AST for a memberDecl.
- */
+* Parse a member declaration.
+* 
+* <pre>
+*   memberDecl ::= [STATIC] block 	   		// inner block
+* 				  | IDENTIFIER            // constructor
+*                    formalParameters
+*                    [THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}] block
+*                | (VOID | type) IDENTIFIER  // method
+*                    formalParameters
+* 					  	[THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+*                    	  (block | SEMI)
+*                | type variableDeclarators SEMI
+* </pre>
+* 
+* @param mods the class member modifiers.
+* @return an AST for a memberDecl.
+*/
     
 private JMember memberDecl( ArrayList<String>  mods ): {
     int line = 0;
@@ -590,6 +593,16 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 }
 {
     try {
+        
+        (
+            body = block()
+            
+            {line =token.beginLine;}
+            {
+                memberDecl = 
+                new JBlockInner(line, mods,body);
+            }
+        )|
         LOOKAHEAD( <IDENTIFIER> <LPAREN> )
         (
             <IDENTIFIER> 
@@ -706,6 +719,7 @@ private JStatement blockStatement(): {
  *               | RETURN [expression] SEMI
  *               | SEMI 
  *               | statementExpression SEMI
+ *               | FOR parExpression statement
  * </pre>
  * 
  * @return an AST for a statement.
@@ -714,11 +728,15 @@ private JStatement blockStatement(): {
 private JStatement statement(): {
     int line = 0;
     JStatement statement = null;
+    JStatement stat = null;
     JExpression test = null;
     JStatement consequent = null;
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+    JExpression condition = null;
+    Type tp = null;
+    ArrayList<JStatement> update;
 }
 {       
     try {
@@ -751,13 +769,81 @@ private JStatement statement(): {
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
         statement = statementExpression() 
+        <SEMI> |
+
+
+        <FOR> <LPAREN>
+        { line = token.beginLine; }
+        {ArrayList<JVariableDeclarator> init = forInit();}
+
+        [<COLON>
+        tp = type()
+        <RPAREN>
+        stat = statement()
+        {return new JEnhancedForStatement(line,init,tp,stat);}
+        ]
         <SEMI>
+        condition = expression()
+        <SEMI>
+        update = forUpdate()
+        <RPAREN>
+        statement = statement()
+        {return new JForStatement(line,init,condition,update,statement);}
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return statement; }
 }
+
+/** 
+* Parse forInit parameters.
+*<pre>
+* forInit ::= statementExpression {, statementExpression}
+*        | type variableDeclarators
+*</pre>
+*
+**/
+
+private ArrayList<JVariableDeclarator> forInit(): {
+    ArrayList<JVariableDeclarator> parameters = new ArrayList<JVariableDeclarator>();
+}
+{
+       try{
+           {parameters.add(variableDeclarator(type()));}
+           (<COMMA> {parameters.add(variableDeclarator(type()));})*
+       }
+       catch(ParseException e){
+           recoverFromError(new int[] {SEMI, EOF},e);
+       }
+       {
+           return parameters;
+       }
+}
+
+
+   /** 
+     * Parse forUpdate parameters.
+     *<pre>
+     * forUpdate ::= statementExpression {, statementExpression}
+     *</pre>
+     *
+     **/
+   private ArrayList<JStatement> forUpdate():{
+		ArrayList<JStatement> parameters = new ArrayList<JStatement>();
+   }
+   {
+       try{
+        {parameters.add(statementExpression());}
+        (<COMMA> {parameters.add(statementExpression());})*
+         
+    }catch(ParseException e){
+        recoverFromError(new int[]{SEMI,EOF},e);
+    }
+    {
+        return parameters;
+    }
+   }
 
 /**
  * Parse formal parameters.
@@ -1066,7 +1152,7 @@ private Type type(): {
  * Parse a basic type.
  * 
  * <pre>
- *   basicType ::= BOOLEAN | CHAR | INT
+ *   basicType ::= BOOLEAN | CHAR | INT | DOUBLE
  * </pre>
  * 
  * @return an instance of Type.
@@ -1079,7 +1165,8 @@ private Type basicType(): {
     try {
         <BOOLEAN> { type = Type.BOOLEAN; } |
         <CHAR> { type = Type.CHAR; } |
-        <INT> { type = Type.INT; }
+        <INT> { type = Type.INT; } |
+        <DOUBLE> { type = Type.DOUBLE; }
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1192,7 +1279,7 @@ private JExpression expression(): {
  * 
  * <pre>
  *   assignmentExpression ::= 
- *       conditionalAndExpression // level 13
+ *       conditionalExpression // level 13
  *           [( ASSIGN  // conditionalExpression
  *            | PLUS_ASSIGN // must be valid lhs
  *            | MINUS_ASSIGN 
@@ -1212,7 +1299,7 @@ private JExpression assignmentExpression(): {
 }
 {
     try {
-        lhs = conditionalAndExpression() { line = lhs.line(); }
+        lhs = conditionalExpression() { line = lhs.line(); }
         [       
             <ASSIGN> 
             rhs = assignmentExpression()
@@ -1298,6 +1385,38 @@ private JExpression conditionalAndExpression(): {
     }
     { return lhs; }
 }
+
+/**
+* Parse a conditional expression.
+* 
+* <pre>
+*   conditionalExpression ::= 
+*       conditionalAndExpression [ ? assignmentExpression : conditionalExpression]
+* </pre>
+* 
+* @return an AST for a conditionalExpression.
+*/
+
+private JExpression conditionalExpression(): {
+    int line = 0;
+    JExpression test = null, consequent = null, alternate = null;
+}
+{
+    try {
+        test = conditionalAndExpression() { line = test.line(); }
+        (
+            <CONDITIONAL_OP>
+            consequent = assignmentExpression()
+            <COLON>
+            alternate = conditionalExpression()
+            { test = new JConditionalExpression(line, test, consequent, alternate); }
+        )*
+    } catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return test; }
+}	
+
 
 /**
  * Parse an equality expression.
@@ -1766,7 +1885,7 @@ private JNewArrayOp newArrayDeclarator( Type type ): {
  * Parse a literal.
  * 
  * <pre>
- *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
+ *   literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL | DOUBLE_LITERAL
  *             | TRUE        | FALSE        | NULL
  * </pre>
  * 
@@ -1784,7 +1903,10 @@ private JExpression literal(): {
         { expr = new JLiteralChar( token.beginLine, token.image ); } |
         <STRING_LITERAL> 
         { expr = 
-              new JLiteralString( token.beginLine, token.image ); } | 
+              new JLiteralDouble( token.beginLine, token.image ); } | 
+        <DOUBLE_LITERAL> 
+        { expr = 
+              new JLiteralString( token.beginLine, token.image ); } |
         <TRUE> 
         { expr = new JLiteralTrue( token.beginLine ); } | 
         <FALSE> 
