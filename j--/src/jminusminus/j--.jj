@@ -273,7 +273,7 @@ TOKEN:
 {
   < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
-| < DOUBLE_LITERAL: ((("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) (".") <DIGIT> (<DIGIT>)*) | "." <DIGIT> (<DIGIT>)* )["D"]>
+| < DOUBLE_LITERAL: ((("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) (".") <DIGIT> (<DIGIT>)*) | "." <DIGIT> (<DIGIT>)* )("D")?>
 | < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" > 
 | < FLOAT_LITERAL: <DOUBLE_LITERAL> "f" >
 | < LONG_LITERAL: <INT_LITERAL> "L" >
