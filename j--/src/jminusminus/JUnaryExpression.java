@@ -365,6 +365,9 @@ class JPostDecrementOp extends JUnaryExpression {
 }
 
 
+/**
+* The AST node for an expr++.
+*/
 
 class JPostIncrementOp extends JUnaryExpression {
 
