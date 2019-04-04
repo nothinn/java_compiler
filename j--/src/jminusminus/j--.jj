@@ -1391,7 +1391,7 @@ private JExpression conditionalAndExpression(): {
 * 
 * <pre>
 *   conditionalExpression ::= 
-*       conditionalAndExpression [ ? assignmentExpression : conditionalExpression]
+*       conditionalOrExpression [ ? assignmentExpression : conditionalExpression]
 * </pre>
 * 
 * @return an AST for a conditionalExpression.
@@ -1403,7 +1403,7 @@ private JExpression conditionalExpression(): {
 }
 {
     try {
-        test = conditionalAndExpression() { line = test.line(); }
+        test = conditionalOrExpression() { line = test.line(); }
         (
             <CONDITIONAL_OP>
             consequent = assignmentExpression()
