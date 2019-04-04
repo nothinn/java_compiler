@@ -157,9 +157,19 @@ class JSubtractOp extends JBinaryExpression {
 	public JExpression analyze(Context context) {
 		lhs = (JExpression) lhs.analyze(context);
 		rhs = (JExpression) rhs.analyze(context);
-		lhs.type().mustMatchExpected(line(), Type.INT);
-		rhs.type().mustMatchExpected(line(), Type.INT);
-		type = Type.INT;
+
+		System.out.println("TESTET");
+		if(lhs.type() == Type.INT){
+			rhs.type().mustMatchExpected(line(),Type.INT);
+			type = Type.INT;
+		}else if(lhs.type() == Type.DOUBLE){
+			rhs.type().mustMatchExpected(line(),Type.DOUBLE);
+			type = Type.DOUBLE;
+		} else{
+			type = Type.ANY;
+			JAST.compilationUnit.reportSemanticError(line,
+						"Types %s and %s can't be used with the '-' operator", lhs.type(), rhs.type());
+		}
 		return this;
 	}
 
