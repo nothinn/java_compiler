@@ -1201,7 +1201,9 @@ public class Parser {
 	private JStatement statementExpression() {
 		int line = scanner.token().line();
 		JExpression expr = expression();
-		if (expr instanceof JAssignment || expr instanceof JPreIncrementOp || expr instanceof JPostDecrementOp
+		if (expr instanceof JAssignment 
+				|| expr instanceof JPreIncrementOp || expr instanceof JPostIncrementOp 
+				|| expr instanceof JPreDecrementOp || expr instanceof JPostDecrementOp
 				|| expr instanceof JMessageExpression || expr instanceof JSuperConstruction
 				|| expr instanceof JThisConstruction || expr instanceof JNewOp || expr instanceof JNewArrayOp) {
 			// So as not to save on stack

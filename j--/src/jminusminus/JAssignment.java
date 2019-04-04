@@ -241,7 +241,7 @@ class JMinusAssignOp extends JAssignment {
 	            type = Type.STRING;
 	        } else {
 	            JAST.compilationUnit.reportSemanticError(line(),
-	                    "Invalid lhs type for +=: " + lhs.type());
+	                    "Invalid lhs type for -=: " + lhs.type());
 	        }
 	        return this;
 	    }
