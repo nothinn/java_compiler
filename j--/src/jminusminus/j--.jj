@@ -1902,11 +1902,9 @@ private JExpression literal(): {
         <CHAR_LITERAL> 
         { expr = new JLiteralChar( token.beginLine, token.image ); } |
         <STRING_LITERAL> 
-        { expr = 
-              new JLiteralDouble( token.beginLine, token.image ); } | 
+        { expr = new JLiteralString( token.beginLine, token.image ); } | 
         <DOUBLE_LITERAL> 
-        { expr = 
-              new JLiteralString( token.beginLine, token.image ); } |
+        { expr = new JLiteralDouble( token.beginLine, token.image ); } |
         <TRUE> 
         { expr = new JLiteralTrue( token.beginLine ); } | 
         <FALSE> 
