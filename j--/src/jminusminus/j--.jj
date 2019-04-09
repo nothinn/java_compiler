@@ -1468,16 +1468,16 @@ private JExpression assignmentExpression(): {
             { lhs = new JAssignOp( line, lhs, rhs ); } |
             <PLUS_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
             <MINUS_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JMinusAssignOp( line, lhs, rhs ); }
+            { lhs = new JMinusAssignOp( line, lhs, rhs ); } |
             <MULT_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JMultAssignOp( line, lhs, rhs ); }
+            { lhs = new JMultAssignOp( line, lhs, rhs ); } |
             <DIV_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JDivAssignOp( line, lhs, rhs ); }
+            { lhs = new JDivAssignOp( line, lhs, rhs ); } |
             <REM_ASSIGN>
             rhs = assignmentExpression()
             { lhs = new JRemAssignOp( line, lhs, rhs ); }
