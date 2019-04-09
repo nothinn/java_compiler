@@ -370,6 +370,7 @@ private TypeName qualifiedIdentifier(): {
             qualifiedIdentifier = token.image; 
         }
         ( 
+            LOOKAHEAD(2)
             <DOT> <IDENTIFIER> 
             { qualifiedIdentifier += "." + token.image; } 
         )*
@@ -1566,6 +1567,7 @@ private JExpression conditionalExpression(): {
     try {
         test = conditionalOrExpression() { line = test.line(); }
         (
+            LOOKAHEAD(2)
             <CONDITIONAL_OP>
             consequent = assignmentExpression()
             <COLON>
@@ -1701,7 +1703,13 @@ private JExpression multiplicativeExpression(): {
         ( 
             <STAR> 
             rhs = unaryExpression()
-            { lhs = new JMultiplyOp( line, lhs, rhs ); }
+            { lhs = new JMultiplyOp( line, lhs, rhs ); }|
+            <DIV>
+            rhs = unaryExpression()
+            {lhs = new JDivideOp(line,lhs,rhs);}|
+            <REM>
+            rhs = unaryExpression()
+            {lhs = new JRemainderOp(line,lhs,rhs);}
         )*
     } 
     catch ( ParseException e ) { 
@@ -1711,17 +1719,18 @@ private JExpression multiplicativeExpression(): {
 }
 
 /**
- * Parse an unary expression.
- * 
- * <pre>
- *   unaryExpression ::= INC unaryExpression // level 1
- *                     | DEC unaryExpression
- *                     | MINUS unaryExpression
- *                     | simpleUnaryExpression
- * </pre>
- * 
- * @return an AST for an unaryExpression.
- */
+* Parse an unary expression.
+* 
+* <pre>
+*   unaryExpression ::= |INC unaryExpression // level 1
+* 					   | DEC unaryExpression
+*                     | MINUS unaryExpression
+* 					   | PLUS unaryExpression
+*                     | simpleUnaryExpression
+* </pre>
+* 
+* @return an AST for an unaryExpression.
+*/
 
 private JExpression unaryExpression(): {
     int line = 0;
@@ -1738,6 +1747,9 @@ private JExpression unaryExpression(): {
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JNegateOp( line, unaryExpr ); } |
+        <PLUS> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JUnPlusOp(line,unaryExpr); } |
         expr = simpleUnaryExpression()
     } 
     catch ( ParseException e ) { 
@@ -1750,7 +1762,8 @@ private JExpression unaryExpression(): {
  * Parse a simple unary expression.
  * 
  * <pre>
- *   simpleUnaryExpression ::= LNOT unaryExpression
+ *   simpleUnaryExpression ::= UC unaryExpression
+ *                           |LNOT unaryExpression
  *                           | LPAREN basicType RPAREN 
  *                               unaryExpression
  *                           | LPAREN         
@@ -1769,6 +1782,9 @@ private JExpression simpleUnaryExpression(): {
 }
 {
     try {
+        <UC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JComplementOp(line, unaryExpr) ;} |
         <LNOT> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JLogicalNotOp( line, unaryExpr ); } |
@@ -1796,7 +1812,7 @@ private JExpression simpleUnaryExpression(): {
  * Parse a postfix expression.
  * 
  * <pre>
- *   postfixExpression ::= primary {selector} {DEC}
+ *   postfixExpression ::= primary {selector} {DEC|INC}
  * </pre>
  * 
  * @return an AST for a postfixExpression.
@@ -1812,11 +1828,12 @@ private JExpression postfixExpression(): {
         (
             primaryExpr = selector( primaryExpr ) 
         )*
-        ( 
+        (
+            LOOKAHEAD(2)
             <DEC> 
             { primaryExpr = 
                 new JPostDecrementOp( line, primaryExpr ); } |
-             
+            LOOKAHEAD(2)
             <INC> 
             { primaryExpr = 
                 new JPostIncrementOp( line, primaryExpr ); } 

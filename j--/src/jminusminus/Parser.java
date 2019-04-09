@@ -1530,8 +1530,11 @@ public class Parser {
 	 * Parse an unary expression.
 	 * 
 	 * <pre>
-	 *   unaryExpression ::= INC unaryExpression // level 1
+	 *   unaryExpression ::= UC unaryExpression 
+	 * 					   | INC unaryExpression // level 1
+	 * 					   | DEC unaryExpression
 	 *                     | MINUS unaryExpression
+	 * 					   | PLUS unaryExpression
 	 *                     | simpleUnaryExpression
 	 * </pre>
 	 * 
