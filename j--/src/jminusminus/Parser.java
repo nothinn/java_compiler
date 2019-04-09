@@ -498,18 +498,18 @@ public class Parser {
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		Type superClass;
-		Type implmentInterface;
+		Type implementInterface;
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
 		if (have(IMPLEMENTS)) {
-			implmentInterface = qualifiedIdentifier();
+			implementInterface = qualifiedIdentifier();
 		} else {
-			implmentInterface = null;
+			implementInterface = null;
 		}
-		return new JClassDeclaration(line, mods, name, superClass, implmentInterface, classBody());
+		return new JClassDeclaration(line, mods, name, superClass, implementInterface, classBody());
 	}
 
 	/**
