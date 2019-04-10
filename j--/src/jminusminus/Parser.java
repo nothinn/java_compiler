@@ -793,6 +793,7 @@ public class Parser {
      *       		   {CATCH ( formalParameter) block}
 	 * 					[FINALLY block] // If no CATCH block, this must be there.
 	 *               | RETURN [expression] SEMI
+	 *               | THROW expression SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
      *               | FOR parExpression statement
@@ -824,7 +825,6 @@ public class Parser {
 			if(have(CATCH)){
 				catchParams = new ArrayList<JFormalParameter>();
 				catchBlocks = new ArrayList<JBlock>();	
-
 				hasCatch = true;
 				mustBe(LPAREN);
 				catchParams.add( formalParameter());
@@ -856,7 +856,11 @@ public class Parser {
 				JExpression expr = expression();
 				mustBe(SEMI);
 				return new JReturnStatement(line, expr);
-			}
+			} 
+		} else if (have(THROW)) {
+			JExpression expr = expression();
+			mustBe(SEMI);
+			return new JThrowStatement(line, expr);
 		} else if (have(SEMI)) {
 			return new JEmptyStatement(line);
         } else if (have(FOR)){                               //for
