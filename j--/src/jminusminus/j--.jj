@@ -193,7 +193,7 @@ TOKEN:
 | < SYNCHRONIZED: "synchronized">
 | < THIS: "this" >
 | < THROW: "throw">
-| < THROWs: "throws">
+| < THROWS: "throws">
 | < TRANSIENT: "transient">
 | < TRY: "try">
 | < TRUE: "true" >
@@ -710,6 +710,15 @@ private JMember memberDecl( ArrayList<String>  mods ): {
                 name = token.image; 
             } 
             params = formalParameters() 
+            [
+            	<THROWS>
+            	{throwNames = new ArrayList<TypeName>();
+            	throwNames.add(qualifiedIdentifier());}
+            	
+            	(<COMMA>
+            	{throwNames.add(qualifiedIdentifier());}
+            	)*
+            ]
             body = block()
             { 
                 memberDecl = 
@@ -726,6 +735,15 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
             params = formalParameters() 
+            [
+            	<THROWS>
+            	{throwNames = new ArrayList<TypeName>();
+            	throwNames.add(qualifiedIdentifier());}
+            	
+            	(<COMMA>
+            	{throwNames.add(qualifiedIdentifier());}
+            	)*
+            ]
             ( 
                 body = block() | 
                 <SEMI> 
@@ -758,6 +776,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 * <pre>
 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
 							formalParameters
+							[THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}]
 							SEMI
 						| type variableDeclarators SEMI // field
 * </pre>
@@ -789,7 +808,12 @@ private JMember interfaceMemberDecl( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
             params = formalParameters() 
-            
+            [
+            	<THROWS>
+            	{throwNames = new ArrayList<TypeName>();
+            	throwNames.add(qualifiedIdentifier());}
+            	(<COMMA>)*
+            ]
             <SEMI> 
             
             { 
@@ -877,8 +901,12 @@ private JStatement blockStatement(): {
  * <pre>
  *   statement ::= block
  *               | IF parExpression statement [ELSE statement]
- *               | WHILE parExpression statement 
+ *               | WHILE parExpression statement
+ * 				 | TRY block
+ *       		   {CATCH ( formalParameter) block}
+ * 					[FINALLY block] // If no CATCH block, this must be there. 
  *               | RETURN [expression] SEMI
+ *				 | THROW expression SEMI
  *               | SEMI 
  *               | statementExpression SEMI
  *               | FOR parExpression statement
@@ -899,6 +927,11 @@ private JStatement statement(): {
     JExpression condition = null;
     Type tp = null;
     ArrayList<JStatement> update;
+    JBlock mainBlock = null;
+	ArrayList<JFormalParameter> catchParams =null;
+	ArrayList<JBlock> catchBlocks = null;
+	JBlock finalBlock = null;
+	boolean hasCatch = false;
 }
 {       
     try {
@@ -921,19 +954,50 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
+    	<TRY> {line = token.beginLine;}
+    	mainBlock = block()
+    	
+    	(
+		<CATCH>
+		{
+    		catchParams = new ArrayList<JFormalParameter>();
+			catchBlocks = new ArrayList<JBlock>();	
+			hasCatch = true;
+		}
+		<LPAREN>
+		{catchParams.add( formalParameter());}
+		<RPAREN>
+		{catchBlocks.add(block());}
+		(
+			<CATCH>
+			<LPAREN>
+    		{catchParams.add( formalParameter());}
+			<RPAREN>
+			{catchBlocks.add(block());}
+		)*
+		(<FINALLY>
+		finalBlock = block()
+		)?
+		|
+		<FINALLY>
+		finalBlock = block()
+		)
+		{statement = new JExceptionStatement(line, mainBlock,catchParams,catchBlocks,finalBlock);}|
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
         ] 
         <SEMI>
         { statement = new JReturnStatement( line, expr ); } |
+        <THROW> { line = token.beginLine; }
+        expr = expression()
+        <SEMI> 
+        {return new JThrowStatement(line, expr);}|
         <SEMI> 
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
         statement = statementExpression() 
         <SEMI> |
-
-
         <FOR> <LPAREN>
         { line = token.beginLine; }
         {ArrayList<JVariableDeclarator> init = forInit();}
