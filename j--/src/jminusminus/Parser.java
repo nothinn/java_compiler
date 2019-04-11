@@ -865,7 +865,8 @@ public class Parser {
 			return new JEmptyStatement(line);
         } else if (have(FOR)){                               //for
             mustBe(LPAREN);                                   //(
-            ArrayList<JVariableDeclarator> init = forInit();
+            ArrayList<JStatement> init = forInit();
+            
             if(have(COLON)){             // enhanced for loop 
                 
                 Type tp = type();
@@ -873,7 +874,6 @@ public class Parser {
                 JStatement stat = statement();      // body of loop
                 return new JEnhancedForStatement(line,init,tp,stat);
             }
-            mustBe(SEMI);
             JExpression condition = expression();          //i<10;
             mustBe(SEMI);
             ArrayList<JStatement> update = forUpdate();
@@ -897,13 +897,18 @@ public class Parser {
      *</pre>
      *
      **/
-   private ArrayList<JVariableDeclarator> forInit(){
-		ArrayList<JVariableDeclarator> parameters = new ArrayList<JVariableDeclarator>();
-        do{
-                    parameters.add(variableDeclarator(type()));  //int i=0;
+   private ArrayList<JStatement> forInit(){
+		ArrayList<JStatement> parameters = new ArrayList<JStatement>();
+        if(seeLocalVariableDeclaration()){
+            parameters.add(localVariableDeclarationStatement());
             
-        }while(have(COMMA));  
-         
+        } else{
+            do{
+                    parameters.add(statement());  //int i=0;
+            
+            }while(have(COMMA));  
+            mustBe(SEMI);
+        } 
         return parameters;
     }
 

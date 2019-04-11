@@ -11,9 +11,9 @@ public class ForStatements {
             sum1 += i;
         }
         int[] a = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        for (int i : a) {
+        /*for (int i : a) {
             sum2 += i;
-        }
+        }*/
         System.out.println(sum1);
         System.out.println(sum2);
     }

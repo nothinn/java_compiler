@@ -65,7 +65,7 @@ formalParameter ::= type IDENTIFIER
 parExpression ::= LPAREN expression RPAREN
 
 forInit ::= statementExpression {COMMA statementExpression}
-             | type variableDeclarators
+             | type statements
 
 forUpdate ::= statementExpression {COMMA statementExpression}
 

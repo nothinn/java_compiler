@@ -8,9 +8,10 @@ import static jminusminus.CLConstants.*;
 
 class JForStatement extends JStatement {
     /** Test expression. */
-    private ArrayList<JVariableDeclarator> declaration;
+    private ArrayList<JStatement> declaration;
     private JExpression condition;
     private ArrayList<JStatement> modif;
+    private LocalContext context;
 
 
     /** The Body */
@@ -28,7 +29,7 @@ class JForStatement extends JStatement {
      *            the body
      */
 
-    public JForStatement(int line,ArrayList<JVariableDeclarator> declaration, JExpression condition, ArrayList<JStatement> modif, JStatement body) {
+    public JForStatement(int line,ArrayList<JStatement> declaration, JExpression condition, ArrayList<JStatement> modif, JStatement body) {
         super(line);
         this.declaration= declaration;
         this.condition = condition;
@@ -46,31 +47,32 @@ class JForStatement extends JStatement {
      */
 
     public JForStatement analyze(Context context) {
-        // local variable to store the data analized on the array
-        ArrayList<JVariableDeclarator> localDeclaration = new ArrayList<JVariableDeclarator>();
+        // local variable to store the data analyzed on the array
 
-        for(JVariableDeclarator d: declaration) {
-            localDeclaration.add((JVariableDeclarator) d.analyze(context));            
+        this.context = new LocalContext(context);
+        if(declaration != null) {
+            for (int i = 0; i < declaration.size(); i++) {
+                declaration.set(i, (JStatement) declaration.get(i).analyze(
+                        this.context));
+            }
         }
-
-        declaration = localDeclaration; // overwrite original array
         
         // Check condition type is boolean
-        condition = (JExpression) condition.analyze(context);
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
-
-
+        if(condition != null) {
+            condition = (JExpression) condition.analyze(this.context);
+            condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        }
         // local variable to store the data analyzed on the array
-        ArrayList<JStatement> localModif = new ArrayList<JStatement>();
-
-        for(JStatement m: modif) {
-            localModif.add((JStatement) m.analyze(context));            
+        
+        for (int i = 0; i < modif.size(); i++) {
+            modif.set(i, (JStatement) modif.get(i).analyze(
+                    this.context));
         }
 
-        modif= localModif; // overwrite original array
+        //this.context = new LocalContext(context);
 
         // Analyze body
-        body = (JStatement) body.analyze(context);
+        body = (JStatement) body.analyze(this.context);
 
         return this;
     }
@@ -91,7 +93,8 @@ class JForStatement extends JStatement {
         p.printf("<JForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Declaration>\n");
-        for(JVariableDeclarator i:declaration){
+        
+        for(JStatement i:declaration){
             i.writeToStdOut(p);
         }
         p.printf("</Declaration>\n");

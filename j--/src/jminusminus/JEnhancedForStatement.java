@@ -8,12 +8,14 @@ import static jminusminus.CLConstants.*;
 
 class JEnhancedForStatement extends JStatement {
     /** Test expression. */
-    private ArrayList<JVariableDeclarator> declaration;
+    private ArrayList<JStatement> declaration;
     private Type id;
+
 
 
     /** The Body */
     private JStatement body;
+    private LocalContext context;
 
     /**
      * Construct an AST node for a for-statement given its line number, the test
@@ -27,7 +29,7 @@ class JEnhancedForStatement extends JStatement {
      *            the body
      */
 
-    public JEnhancedForStatement(int line,ArrayList<JVariableDeclarator> declaration, Type id, JStatement body) {
+    public JEnhancedForStatement(int line,ArrayList<JStatement> declaration, Type id, JStatement body) {
         super(line);
         this.declaration= declaration;
         this.id = id;
@@ -44,6 +46,17 @@ class JEnhancedForStatement extends JStatement {
      */
 
     public JEnhancedForStatement analyze(Context context) {
+
+        this.context = new LocalContext(context);
+        /*
+        for (int i = 0; i < declaration.size(); i++) {
+            declaration.set(i, (JVariableDeclarator) declaration.get(i).analyze(
+                    this.context));
+        }
+        id.mustMatchExpected(line(),declaration.get(0).type());
+
+
+        */
         return this;
     }
 
@@ -63,7 +76,7 @@ class JEnhancedForStatement extends JStatement {
         p.printf("<JEnhancedForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Declaration>\n");
-        for(JVariableDeclarator i: declaration){
+        for(JStatement i: declaration){
             i.writeToStdOut(p);
         }
         p.printf("</Declaration>\n");
