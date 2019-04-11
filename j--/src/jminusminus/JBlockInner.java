@@ -11,8 +11,7 @@ import java.util.ArrayList;
 class JBlockInner extends JBlock implements JMember {
 
     /** List of statements forming the block body. */
-    //private ArrayList<JStatement> statements;
-    private JBlock block;
+    private ArrayList<JStatement> statements;
 
     /**
      * The new context (built in analyze()) represented by this block.
@@ -42,7 +41,7 @@ class JBlockInner extends JBlock implements JMember {
 
     public JBlockInner(int line, ArrayList<String> mods, JBlock body) {
         super(line, body.statements());
-        this.block = body;
+        this.statements = body.statements();
         this.mods = mods;
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
         this.isStatic = mods == null ? false :  mods.contains("static");
@@ -53,11 +52,11 @@ class JBlockInner extends JBlock implements JMember {
      * 
      * @return list of statements.
      */
-/*
+
     public ArrayList<JStatement> statements() {
         return statements;
     }
-*/
+
     /**
      * Return the list of modifiers.
      * 
@@ -69,6 +68,7 @@ class JBlockInner extends JBlock implements JMember {
     }
 
     /**
+     * NOT IMPLEMENTED YET!!!!!!!!
      * 
      * Declare this constructor in the parent (class) context.
      * 
@@ -80,10 +80,10 @@ class JBlockInner extends JBlock implements JMember {
      */
 
     public void preAnalyze(Context context, CLEmitter partial) {
-        /*if (isStatic) {
+        if (isStatic) {
             JAST.compilationUnit.reportSemanticError(line(),
                     "Constructor cannot be declared static");
-        }*/
+        }
     }
 
     /**
@@ -98,7 +98,13 @@ class JBlockInner extends JBlock implements JMember {
      */
 
     public JBlockInner analyze(Context context) {
-        block = block.analyze(context);
+        // { ... } defines a new level of scope.
+        this.context = new LocalContext(context);
+
+        for (int i = 0; i < statements.size(); i++) {
+            statements.set(i, (JStatement) statements.get(i).analyze(
+                    this.context));
+        }
         return this;
     }
 
@@ -114,9 +120,9 @@ class JBlockInner extends JBlock implements JMember {
      */
 
     public void codegen(CLEmitter output) {
-        /*for (JStatement statement : statements) {
+        for (JStatement statement : statements) {
             statement.codegen(output);
-        }*/
+        }
     }
 
     /**
@@ -139,7 +145,11 @@ class JBlockInner extends JBlock implements JMember {
             context.writeToStdOut(p);
             p.indentLeft();
         }
-        block.writeToStdOut(p);
+        for (JStatement statement : statements) {
+            p.indentRight();
+            statement.writeToStdOut(p);
+            p.indentLeft();
+        }
         p.printf("</JBlockInner>\n");
     }
 
