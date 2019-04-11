@@ -498,18 +498,18 @@ public class Parser {
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		Type superClass;
-		Type implmentInterface;
+		Type implementInterface;
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
 		if (have(IMPLEMENTS)) {
-			implmentInterface = qualifiedIdentifier();
+			implementInterface = qualifiedIdentifier();
 		} else {
-			implmentInterface = null;
+			implementInterface = null;
 		}
-		return new JClassDeclaration(line, mods, name, superClass, implmentInterface, classBody());
+		return new JClassDeclaration(line, mods, name, superClass, implementInterface, classBody());
 	}
 
 	/**
@@ -793,6 +793,7 @@ public class Parser {
      *       		   {CATCH ( formalParameter) block}
 	 * 					[FINALLY block] // If no CATCH block, this must be there.
 	 *               | RETURN [expression] SEMI
+	 *               | THROW expression SEMI
 	 *               | SEMI 
 	 *               | statementExpression SEMI
      *               | FOR parExpression statement
@@ -824,7 +825,6 @@ public class Parser {
 			if(have(CATCH)){
 				catchParams = new ArrayList<JFormalParameter>();
 				catchBlocks = new ArrayList<JBlock>();	
-
 				hasCatch = true;
 				mustBe(LPAREN);
 				catchParams.add( formalParameter());
@@ -856,7 +856,11 @@ public class Parser {
 				JExpression expr = expression();
 				mustBe(SEMI);
 				return new JReturnStatement(line, expr);
-			}
+			} 
+		} else if (have(THROW)) {
+			JExpression expr = expression();
+			mustBe(SEMI);
+			return new JThrowStatement(line, expr);
 		} else if (have(SEMI)) {
 			return new JEmptyStatement(line);
         } else if (have(FOR)){                               //for
@@ -1530,8 +1534,11 @@ public class Parser {
 	 * Parse an unary expression.
 	 * 
 	 * <pre>
-	 *   unaryExpression ::= INC unaryExpression // level 1
+	 *   unaryExpression ::= UC unaryExpression 
+	 * 					   | INC unaryExpression // level 1
+	 * 					   | DEC unaryExpression
 	 *                     | MINUS unaryExpression
+	 * 					   | PLUS unaryExpression
 	 *                     | simpleUnaryExpression
 	 * </pre>
 	 * 

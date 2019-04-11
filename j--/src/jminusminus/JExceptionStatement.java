@@ -84,11 +84,11 @@ import java.util.*;
             p.indentLeft();
             p.printf("</CatchParam\n");
 
-            p.printf("<CatchBlock>");
+            p.printf("<CatchBlock>\n");
             p.indentRight();
             blockIte.next().writeToStdOut(p);
             p.indentLeft();
-            p.printf("</CatchBlock>");
+            p.printf("</CatchBlock>\n");
             
             }   
         }   
