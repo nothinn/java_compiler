@@ -6,7 +6,7 @@ import static jminusminus.CLConstants.*;
 class JInterfaceDeclaration extends JAST implements JTypeDecl{
 	
 	
-	/** Interface modifiers. (only public or empty is allowed)*/
+	/** Interface modifiers. (only public or empty is allowed)*/ 
 	 private ArrayList<String> mods;
 
     /** Interface name. */
@@ -16,7 +16,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
     private ArrayList<JMember> interfaceBlock;
 
     /** Super interface type. */
-    private Type superType;
+    private ArrayList<Type> superType;
 
     /** This interface type. */
     private Type thisType;
@@ -60,7 +60,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      */
     
     public JInterfaceDeclaration(int line, ArrayList<String> mods, String name,
-            Type superType, ArrayList<JMember> interfaceBlock) { // is this right??
+            ArrayList<Type> superType, ArrayList<JMember> interfaceBlock) { // is this right??
         super(line);
         this.mods = mods;
         this.name = name;
@@ -87,7 +87,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      */
 
     public Type superType() {
-        return superType;
+        return null; 
     }
 
     /**
@@ -121,7 +121,41 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      *            the parent (compilation unit) context.
      */
 
-    public void preAnalyze(Context context) {    } //implment later
+    public void preAnalyze(Context context) {
+        this.context = new ClassContext(this, context);
+        
+        ArrayList<String> jvmNames = new ArrayList<String>();
+        if(superType != null){
+            for(int i = 0; i < superType.size(); i++){
+                superType.set(i, superType.get(i).resolve(this.context));
+                jvmNames.add(superType.get(i).jvmName());
+            }
+        }
+
+
+        if(mods.isEmpty()){ //Interface is always public.
+            mods.add("public");
+        }
+
+        // Create the (partial) class
+        CLEmitter partial = new CLEmitter(false);
+
+        // Add the class header to the partial class
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), jvmNames, false);
+
+
+
+        // Get the Class rep for the (partial) class and make it
+        // the
+        // representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
+
+      }
 
     
     /**
@@ -134,7 +168,16 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      */
     
     
-    public JAST analyze(Context context) { return this ; }	
+    public JAST analyze(Context context) {
+        //Analyze all members
+        p.printf("TEst\n");
+        for(JMember member : interfaceBlock){
+            ((JAST) member).analyze(this.context);
+        }
+
+
+
+        return this ; }	
     
     
     /**
@@ -148,8 +191,20 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
     public void codegen(CLEmitter output) { }
     
     public void writeToStdOut(PrettyPrinter p) {
+    	StringBuilder superTypes = new StringBuilder();
+    	if( superType != null ) {
+    		for(int i = 0; i<superType.size(); i++) {
+    			if(i == 0) {
+    				superTypes.append(superType.get(i).toString());
+    			}else {    				
+    				superTypes.append(", " + superType.get(i).toString());
+    			}
+    		}
+       	} else {
+       		superTypes.append("null");
+       	}
         p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\""
-                + " super=\"%s\">\n", line(), name, superType.toString());
+                + " super=\"%s\">\n", line(), name, superTypes.toString());
         p.indentRight();
         if (context != null) {
             context.writeToStdOut(p);

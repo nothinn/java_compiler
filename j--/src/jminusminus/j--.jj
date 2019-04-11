@@ -507,7 +507,7 @@ private ArrayList<String> modifiers(): {
  * <pre>
  *   classDeclaration ::= CLASS IDENTIFIER 
  *                        [EXTENDS qualifiedIdentifier]
- *						  [IMPLEMENTS qualifiedIdentifier] 
+ *						  [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}] 
  *                        classBody
  * </pre>
  * 
@@ -523,7 +523,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
-    Type implementInterface = null;
+    ArrayList<Type> implementInterface = null;
 }
 {
     try {
@@ -533,7 +533,13 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
             <EXTENDS> superClass = qualifiedIdentifier() 
         ]
         [
-        	<IMPLEMENTS> implementInterface = qualifiedIdentifier()
+        	<IMPLEMENTS> 
+        	{implementInterface = new ArrayList<Type>();
+        	implementInterface.add(qualifiedIdentifier());}
+        	(
+        	<COMMA> 
+        	{implementInterface.add(qualifiedIdentifier());}
+        	)*
         ]
         classBody = classBody()           
     } 
@@ -586,7 +592,7 @@ private ArrayList<JMember> classBody(): {
  * 
  * <pre>
  *   interfaceDeclaration ::= INTERFACE IDENTIFIER			
-							[EXTENDS qualifiedIdentifier]
+							[EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
 							interfaceBody
  * </pre>
  * 
@@ -598,7 +604,7 @@ private ArrayList<JMember> classBody(): {
 private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
     int line = 0;
     String name = "";
-    Type superInterface = Type.OBJECT;
+    ArrayList<Type> superInterface = null;
     ArrayList<JMember> interfaceBody = null;
     if(!(mods.isEmpty() || (mods.size() == 1 && mods.get(0) == "public"))){
 		reportParserError( "Interface must have no modifier or public" );
@@ -611,7 +617,13 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
         <INTERFACE> { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         [ 
-            <EXTENDS> superInterface = qualifiedIdentifier() 
+            <EXTENDS> 
+            {superInterface = new ArrayList<Type>();
+            superInterface.add(qualifiedIdentifier());}
+        	(
+        	<COMMA> 
+        	{superInterface.add(qualifiedIdentifier());}
+        	)*
         ]
         interfaceBody = interfaceBody()
               
