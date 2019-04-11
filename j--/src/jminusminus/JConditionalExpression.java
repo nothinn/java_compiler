@@ -52,13 +52,14 @@ class JConditionalExpression extends JExpression {
 
     public JExpression analyze(Context context) {
 
-        /* NOT YET IMPLEMENTED
         condition = (JExpression) condition.analyze(context);
         condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+
+
         thenPart = (JExpression) thenPart.analyze(context);
 
         elsePart = (JExpression) elsePart.analyze(context);
-        */
+        
 
         return this;
     }
