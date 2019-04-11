@@ -270,7 +270,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     	StringBuilder interfaceTypes = new StringBuilder();
     	if( interfaceType != null) {
     		for(int i = 0; i<interfaceType.size(); i++) {
-    			interfaceTypes.append(interfaceType.get(i).toString());
+    			if(i == 0) {
+    				interfaceTypes.append(interfaceType.get(i).toString());    				
+    			}else {
+    				interfaceTypes.append(", " + interfaceType.get(i).toString());
+    			}
     		}
     	} else {
     		interfaceTypes.append("null");
