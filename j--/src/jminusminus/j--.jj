@@ -534,7 +534,8 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         ]
         [
         	<IMPLEMENTS> 
-        	{implementInterface.add(qualifiedIdentifier());}
+        	{implementInterface = new ArrayList<Type>();
+        	implementInterface.add(qualifiedIdentifier());}
         	(
         	<COMMA> 
         	{implementInterface.add(qualifiedIdentifier());}
@@ -617,7 +618,8 @@ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
         <IDENTIFIER> { name = token.image; }
         [ 
             <EXTENDS> 
-            {superInterface.add(qualifiedIdentifier());}
+            {superInterface = new ArrayList<Type>();
+            superInterface.add(qualifiedIdentifier());}
         	(
         	<COMMA> 
         	{superInterface.add(qualifiedIdentifier());}

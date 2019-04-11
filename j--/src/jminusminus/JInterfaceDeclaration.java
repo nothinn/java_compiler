@@ -148,8 +148,16 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
     public void codegen(CLEmitter output) { }
     
     public void writeToStdOut(PrettyPrinter p) {
+    	StringBuilder superTypes = new StringBuilder();
+    	if( superType != null ) {
+    		for(int i = 0; i<superType.size(); i++) {
+    			superTypes.append(superType.get(i).toString());
+    		}
+       	} else {
+       		superTypes.append("null");
+       	}
         p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\""
-                + " super=\"%s\">\n", line(), name, superType.toString());
+                + " super=\"%s\">\n", line(), name, superTypes.toString());
         p.indentRight();
         if (context != null) {
             context.writeToStdOut(p);
