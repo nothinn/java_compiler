@@ -6,7 +6,7 @@ import static jminusminus.CLConstants.*;
 class JInterfaceDeclaration extends JAST implements JTypeDecl{
 	
 	
-	/** Interface modifiers. (only public or empty is allowed)*/
+	/** Interface modifiers. (only public or empty is allowed)*/ 
 	 private ArrayList<String> mods;
 
     /** Interface name. */
@@ -16,7 +16,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
     private ArrayList<JMember> interfaceBlock;
 
     /** Super interface type. */
-    private Type superType;
+    private ArrayList<Type> superType;
 
     /** This interface type. */
     private Type thisType;
@@ -60,7 +60,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      */
     
     public JInterfaceDeclaration(int line, ArrayList<String> mods, String name,
-            Type superType, ArrayList<JMember> interfaceBlock) { // is this right??
+            ArrayList<Type> superType, ArrayList<JMember> interfaceBlock) { // is this right??
         super(line);
         this.mods = mods;
         this.name = name;
@@ -87,7 +87,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      */
 
     public Type superType() {
-        return superType;
+        return null; 
     }
 
     /**

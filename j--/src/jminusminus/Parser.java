@@ -481,7 +481,7 @@ public class Parser {
 	 * <pre>
 	 *   classDeclaration ::= CLASS IDENTIFIER 
                        			[EXTENDS qualifiedIdentifier]
-			                    [IMPLEMENTS qualifiedIdentifier] //change has to be implemented
+			                    [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}] //change has to be implemented
 			                    classBody
 	 * </pre>
 	 * 
@@ -498,14 +498,22 @@ public class Parser {
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
 		Type superClass;
-		Type implementInterface;
+		ArrayList<Type> implementInterface = null;
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
 		if (have(IMPLEMENTS)) {
-			implementInterface = qualifiedIdentifier();
+			implementInterface = new ArrayList<Type>();
+			implementInterface.add(qualifiedIdentifier());
+			while(true) {
+				if(have(COMMA)) {
+					implementInterface.add(qualifiedIdentifier());
+				}else {
+					break;
+				}
+			}
 		} else {
 			implementInterface = null;
 		}
@@ -540,7 +548,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   interfaceDeclaration ::= INTERFACE IDENTIFIER 
-	 *                        [EXTENDS qualifiedIdentifier] 
+	 *                        [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}] 
 	 *                        interfaceBody
 	 * </pre>
 	 * 
@@ -556,12 +564,18 @@ public class Parser {
 		mustBe(INTERFACE);
 		mustBe(IDENTIFIER);
 		String name = scanner.previousToken().image();
-		Type superInterface;						//must be implemented
+		ArrayList<Type> superInterface = null;						//must be implemented
 		if (have(EXTENDS)) {
-			superInterface = qualifiedIdentifier();
-		} else {
-			superInterface = Type.OBJECT;
-		}
+			superInterface = new ArrayList<Type>();
+			superInterface.add(qualifiedIdentifier());
+			while(true) {
+				if(have(COMMA)) {
+					superInterface.add(qualifiedIdentifier());
+				}else {
+					break;
+				}
+			}
+		} 
 		return new JInterfaceDeclaration(line, mods, name, superInterface, interfaceBody());
 	}
 	

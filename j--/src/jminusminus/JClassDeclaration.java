@@ -27,7 +27,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     private Type superType;
     
     /** Interface type  */
-    private Type interfaceType;
+    private ArrayList<Type> interfaceType;
 
     /** This class type. */
     private Type thisType;
@@ -62,7 +62,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-            Type superType, Type interfaceType, ArrayList<JMember> classBlock) {
+            Type superType, ArrayList<Type> interfaceType, ArrayList<JMember> classBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
