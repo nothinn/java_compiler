@@ -121,7 +121,41 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      *            the parent (compilation unit) context.
      */
 
-    public void preAnalyze(Context context) {    } //implment later
+    public void preAnalyze(Context context) {
+        this.context = new ClassContext(this, context);
+        
+        ArrayList<String> jvmNames = new ArrayList<String>();
+        if(superType != null){
+            for(int i = 0; i < superType.size(); i++){
+                superType.set(i, superType.get(i).resolve(this.context));
+                jvmNames.add(superType.get(i).jvmName());
+            }
+        }
+
+
+        if(mods.isEmpty()){ //Interface is always public.
+            mods.add("public");
+        }
+
+        // Create the (partial) class
+        CLEmitter partial = new CLEmitter(false);
+
+        // Add the class header to the partial class
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), jvmNames, false);
+
+
+
+        // Get the Class rep for the (partial) class and make it
+        // the
+        // representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
+
+      }
 
     
     /**
@@ -134,7 +168,16 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
      */
     
     
-    public JAST analyze(Context context) { return this ; }	
+    public JAST analyze(Context context) {
+        //Analyze all members
+        p.printf("TEst\n");
+        for(JMember member : interfaceBlock){
+            ((JAST) member).analyze(this.context);
+        }
+
+
+
+        return this ; }	
     
     
     /**
