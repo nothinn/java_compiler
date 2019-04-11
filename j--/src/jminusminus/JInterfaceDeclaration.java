@@ -194,7 +194,11 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
     	StringBuilder superTypes = new StringBuilder();
     	if( superType != null ) {
     		for(int i = 0; i<superType.size(); i++) {
-    			superTypes.append(superType.get(i).toString());
+    			if(i == 0) {
+    				superTypes.append(superType.get(i).toString());
+    			}else {    				
+    				superTypes.append(", " + superType.get(i).toString());
+    			}
     		}
        	} else {
        		superTypes.append("null");
