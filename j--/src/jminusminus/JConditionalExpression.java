@@ -56,6 +56,7 @@ class JConditionalExpression extends JExpression {
 
         thenPart = (JExpression) thenPart.analyze(context);
         elsePart = (JExpression) elsePart.analyze(context);
+        
 
         thenPart.type().mustMatchExpected(line(), elsePart.type());
         //elsePart.type().mustMatchExpected(line(), thenPart.type());
