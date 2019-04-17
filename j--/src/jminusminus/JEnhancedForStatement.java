@@ -48,15 +48,14 @@ class JEnhancedForStatement extends JStatement {
     public JEnhancedForStatement analyze(Context context) {
 
         this.context = new LocalContext(context);
-        /*
+        
         for (int i = 0; i < declaration.size(); i++) {
-            declaration.set(i, (JVariableDeclarator) declaration.get(i).analyze(
+            declaration.set(i, (JStatement) declaration.get(i).analyze(
                     this.context));
         }
-        id.mustMatchExpected(line(),declaration.get(0).type());
+        //TODO : Shouldn't we check that the second argument has a similar type as the declared type ? 
 
-
-        */
+        
         return this;
     }
 

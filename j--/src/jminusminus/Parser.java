@@ -880,21 +880,22 @@ public class Parser {
         } else if (have(FOR)){                               //for
             mustBe(LPAREN);                                   //(
             ArrayList<JStatement> init = forInit();
-            
-            if(have(COLON)){             // enhanced for loop 
-                
+            if(have(SEMI)){     //legacy for loop
+                JExpression condition = expression();          //i<10;
+                mustBe(SEMI);
+                ArrayList<JStatement> update = forUpdate();
+                mustBe(RPAREN);
+                JStatement statement = statement();      // body of loop
+                return new JForStatement(line,init,condition,update,statement);
+
+            } else {
+                mustBe(COLON);             // enhanced for loop 
                 Type tp = type();
                 mustBe(RPAREN);
                 JStatement stat = statement();      // body of loop
                 return new JEnhancedForStatement(line,init,tp,stat);
             }
-            JExpression condition = expression();          //i<10;
-            mustBe(SEMI);
-            ArrayList<JStatement> update = forUpdate();
-            mustBe(RPAREN);
-            JStatement statement = statement();      // body of loop
-            return new JForStatement(line,init,condition,update,statement);
-         
+                    
         } else { // Must be a statementExpression
             JStatement statement = statementExpression();
             mustBe(SEMI);
@@ -913,18 +914,21 @@ public class Parser {
      **/
    private ArrayList<JStatement> forInit(){
 		ArrayList<JStatement> parameters = new ArrayList<JStatement>();
-        if(seeLocalVariableDeclaration()){
-            parameters.add(localVariableDeclarationStatement());
-            
-        } else{
-            do{
-                    parameters.add(statement());  //int i=0;
-            
-            }while(have(COMMA));  
-            mustBe(SEMI);
-        } 
+        do{
+                //should not happen in a enhanced for loop 
+                parameters.add(forVariableDeclarationStatement()); //this consumes a SEMI
+         }while(have(COMMA));  
+
         return parameters;
     }
+   
+   private JVariableDeclaration forVariableDeclarationStatement() {
+		int line = scanner.token().line();
+		ArrayList<String> mods = new ArrayList<String>();
+		ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
+		return new JVariableDeclaration(line, mods, vdecls);
+	}
+   
 
        
     

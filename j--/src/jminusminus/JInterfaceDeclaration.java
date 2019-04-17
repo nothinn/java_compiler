@@ -170,7 +170,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
     
     public JAST analyze(Context context) {
         //Analyze all members
-        p.printf("TEst\n");
+        //p.printf("TEst\n");
         for(JMember member : interfaceBlock){
             ((JAST) member).analyze(this.context);
         }
