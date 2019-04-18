@@ -8,7 +8,7 @@ import static jminusminus.CLConstants.*;
 
 class JEnhancedForStatement extends JStatement {
     /** Test expression. */
-    private ArrayList<JStatement> declaration;
+    private ArrayList<JVariableDeclaration> declaration;
     private Type id;
 
 
@@ -29,7 +29,7 @@ class JEnhancedForStatement extends JStatement {
      *            the body
      */
 
-    public JEnhancedForStatement(int line,ArrayList<JStatement> declaration, Type id, JStatement body) {
+    public JEnhancedForStatement(int line,ArrayList<JVariableDeclaration> declaration, Type id, JStatement body) {
         super(line);
         this.declaration= declaration;
         this.id = id;
@@ -50,10 +50,13 @@ class JEnhancedForStatement extends JStatement {
         this.context = new LocalContext(context);
         
         for (int i = 0; i < declaration.size(); i++) {
-            declaration.set(i, (JStatement) declaration.get(i).analyze(
+            declaration.set(i, (JVariableDeclaration) declaration.get(i).analyze(
                     this.context));
         }
         //TODO : Shouldn't we check that the second argument has a similar type as the declared type ? 
+        //id = (Type) id.analyze(this.context);
+
+        body = (JStatement) body.analyze(this.context);
 
         
         return this;
@@ -75,7 +78,7 @@ class JEnhancedForStatement extends JStatement {
         p.printf("<JEnhancedForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Declaration>\n");
-        for(JStatement i: declaration){
+        for(JVariableDeclaration i: declaration){
             i.writeToStdOut(p);
         }
         p.printf("</Declaration>\n");

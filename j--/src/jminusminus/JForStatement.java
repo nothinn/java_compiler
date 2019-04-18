@@ -8,7 +8,7 @@ import static jminusminus.CLConstants.*;
 
 class JForStatement extends JStatement {
     /** Test expression. */
-    private ArrayList<JStatement> declaration;
+    private ArrayList<JVariableDeclaration> declaration;
     private JExpression condition;
     private ArrayList<JStatement> modif;
     private LocalContext context;
@@ -29,7 +29,7 @@ class JForStatement extends JStatement {
      *            the body
      */
 
-    public JForStatement(int line,ArrayList<JStatement> declaration, JExpression condition, ArrayList<JStatement> modif, JStatement body) {
+    public JForStatement(int line,ArrayList<JVariableDeclaration> declaration, JExpression condition, ArrayList<JStatement> modif, JStatement body) {
         super(line);
         this.declaration= declaration;
         this.condition = condition;
@@ -52,7 +52,7 @@ class JForStatement extends JStatement {
         this.context = new LocalContext(context);
         if(declaration != null) {
             for (int i = 0; i < declaration.size(); i++) {
-                declaration.set(i, (JStatement) declaration.get(i).analyze(
+                declaration.set(i, (JVariableDeclaration) declaration.get(i).analyze(
                         this.context));
             }
         }
@@ -94,7 +94,7 @@ class JForStatement extends JStatement {
         p.indentRight();
         p.printf("<Declaration>\n");
         
-        for(JStatement i:declaration){
+        for(JVariableDeclaration i:declaration){
             i.writeToStdOut(p);
         }
         p.printf("</Declaration>\n");

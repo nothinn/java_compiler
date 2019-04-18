@@ -879,7 +879,7 @@ public class Parser {
 			return new JEmptyStatement(line);
         } else if (have(FOR)){                               //for
             mustBe(LPAREN);                                   //(
-            ArrayList<JStatement> init = forInit();
+            ArrayList<JVariableDeclaration> init = forInit();
             if(have(SEMI)){     //legacy for loop
                 JExpression condition = expression();          //i<10;
                 mustBe(SEMI);
@@ -912,16 +912,18 @@ public class Parser {
      *</pre>
      *
      **/
-   private ArrayList<JStatement> forInit(){
-		ArrayList<JStatement> parameters = new ArrayList<JStatement>();
+   private ArrayList<JVariableDeclaration> forInit(){
+		ArrayList<JVariableDeclaration> parameters = new ArrayList<JVariableDeclaration>();
         do{
-                //should not happen in a enhanced for loop 
-                parameters.add(forVariableDeclarationStatement()); //this consumes a SEMI
+                parameters.add(forVariableDeclarationStatement());
          }while(have(COMMA));  
 
         return parameters;
     }
    
+   /**
+    * Parse a localVariableDeclaration WITHOUT a SEMI at the end
+    **/
    private JVariableDeclaration forVariableDeclarationStatement() {
 		int line = scanner.token().line();
 		ArrayList<String> mods = new ArrayList<String>();
