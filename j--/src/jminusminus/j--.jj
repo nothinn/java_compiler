@@ -1012,21 +1012,23 @@ private JStatement statement(): {
         <SEMI> |
         <FOR> <LPAREN>
         { line = token.beginLine; }
-        {ArrayList<JVariableDeclarator> init = forInit();}
-
-        [<COLON>
-        tp = type()
-        <RPAREN>
-        stat = statement()
-        {return new JEnhancedForStatement(line,init,tp,stat);}
-        ]
+        {ArrayList<JVariableDeclaration> init = forInit();}
+        
+        [ 
         <SEMI>
-        condition = expression()
-        <SEMI>
-        update = forUpdate()
-        <RPAREN>
-        statement = statement()
-        {return new JForStatement(line,init,condition,update,statement);}
+            {condition = expression();}
+            <SEMI>
+            { update = forUpdate();}
+            <RPAREN>
+            {statement = statement();}
+            
+            {return new JForStatement(line,init,condition,update,statement);}
+         |<COLON> 
+            { tp = type();}
+            <RPAREN>
+            {stat = statement();}
+            {return new JEnhancedForStatement(line,init,tp,stat);}
+            ]        
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1043,13 +1045,12 @@ private JStatement statement(): {
 *
 **/
 
-private ArrayList<JVariableDeclarator> forInit(): {
-    ArrayList<JVariableDeclarator> parameters = new ArrayList<JVariableDeclarator>();
+private ArrayList<JVariableDeclaration> forInit(): {
+    ArrayList<JVariableDeclaration> parameters = new ArrayList<JVariableDeclaration>();
 }
 {
        try{
-           {parameters.add(variableDeclarator(type()));}
-           (<COMMA> {parameters.add(variableDeclarator(type()));})*
+           {parameters.add(forVariableDeclarationStatement());}
        }
        catch(ParseException e){
            recoverFromError(new int[] {SEMI, EOF},e);
@@ -1058,6 +1059,27 @@ private ArrayList<JVariableDeclarator> forInit(): {
            return parameters;
        }
 }
+/**
+    * Parse a localVariableDeclaration WITHOUT a SEMI at the end
+    **/
+   private JVariableDeclaration forVariableDeclarationStatement(): {
+        int line = 0;
+        Type type = null;
+        ArrayList<JVariableDeclarator> vdecls = null;
+        ArrayList<String> mods = new ArrayList<String>();
+        }
+        {
+        try {
+            type = type() { line = token.beginLine; }
+            vdecls = variableDeclarators( type ) 
+        } 
+        catch ( ParseException e ) { 
+            recoverFromError( new int[] { SEMI,EOF }, e ); 
+        }   
+        { return new JVariableDeclaration( line, mods, vdecls ); }
+}
+       
+
 
 
    /** 

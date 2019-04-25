@@ -908,15 +908,17 @@ public class Parser {
      * Parse forInit parameters.
      *<pre>
      * forInit ::= statementExpression {, statementExpression}
-             | type variableDeclarators
+             | type variableDeclaration
      *</pre>
      *
      **/
    private ArrayList<JVariableDeclaration> forInit(){
 		ArrayList<JVariableDeclaration> parameters = new ArrayList<JVariableDeclaration>();
         do{
-                parameters.add(forVariableDeclarationStatement());
+                JVariableDeclaration element = forVariableDeclarationStatement();
+                parameters.add(element);
          }while(have(COMMA));  
+        
 
         return parameters;
     }
