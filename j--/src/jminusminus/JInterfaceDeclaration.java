@@ -135,17 +135,22 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl{
 
         if(mods.isEmpty()){ //Interface is always public.
             mods.add("public");
+            mods.add("abstract");
         }
 
-        // Create the (partial) class
+        // Create the (partial) interface
         CLEmitter partial = new CLEmitter(false);
 
-        // Add the class header to the partial class
+        // Add the interface header to the partial interface
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), jvmNames, false);
 
-
+        // Pre-analyze the members and add them to the partial
+        // class
+        for (JMember member : interfaceBlock) {
+            member.preAnalyze(this.context, partial);
+        }
 
         // Get the Class rep for the (partial) class and make it
         // the
