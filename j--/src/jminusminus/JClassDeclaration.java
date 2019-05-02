@@ -43,6 +43,12 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     /** Static (class) fields of this class. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
+    
+    /** Instance block of this class. */
+    private ArrayList<JBlockInner> instanceBlockInitializations;
+
+    /** Static (class) block of this class. */
+    private ArrayList<JBlockInner> staticBlockInitializations;
 
     /**
      * Construct an AST node for a class declaration given the line number, list
@@ -72,6 +78,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        instanceBlockInitializations = new ArrayList<JBlockInner>();
+        staticBlockInitializations = new ArrayList<JBlockInner>();
     }
 
     /**
@@ -113,6 +121,17 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public ArrayList<JFieldDeclaration> instanceFieldInitializations() {
         return instanceFieldInitializations;
+    }
+    
+    /**
+     * The initializations for instance block (now expressed as assignment
+     * statments).
+     * 
+     * @return the block declarations having initializations.
+     */
+
+    public ArrayList<JBlockInner> instanceBlockInitializations() {
+        return instanceBlockInitializations;
     }
 
     /**
@@ -214,6 +233,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 } else {
                     instanceFieldInitializations.add(fieldDecl);
                 }
+            }else if (member instanceof JBlockInner) {
+                JBlockInner blockDecl = (JBlockInner) member;
+                if (blockDecl.mods().contains("static")) {
+                    staticBlockInitializations.add(blockDecl);
+                } else {
+                    instanceBlockInitializations.add(blockDecl);
+                }
             }
         }
 
@@ -257,7 +283,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Generate a class initialization method?
-        if (staticFieldInitializations.size() > 0) {
+        if (staticFieldInitializations.size() + staticBlockInitializations.size() > 0) {
             codegenClassInit(output);
         }
     }
@@ -350,9 +376,14 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         for (JFieldDeclaration instanceField : instanceFieldInitializations) {
             instanceField.codegenInitializations(output);
         }
-
+        
+        for (JBlockInner instanceBlock : instanceBlockInitializations) {
+        	instanceBlock.codegen(output);
+        }
         // Return
+        
         output.addNoArgInstruction(RETURN);
+        
     }
 
     /**
@@ -372,8 +403,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // If there are instance initializations, generate code
         // for them
-        for (JFieldDeclaration staticField : staticFieldInitializations) {
-            staticField.codegenInitializations(output);
+        if(staticFieldInitializations.size() > 0) {
+        	for (JFieldDeclaration staticField : staticFieldInitializations) {
+        		staticField.codegenInitializations(output);
+        	}        	
+        }
+        
+        if(staticBlockInitializations.size() > 0) {
+        	for (JBlockInner staticBlock : staticBlockInitializations) {
+        		staticBlock.codegen(output);
+        	}        	
         }
 
         // Return
