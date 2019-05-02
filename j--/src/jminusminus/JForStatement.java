@@ -78,7 +78,7 @@ class JForStatement extends JStatement {
     }
 
     /**
-     * Generate code for the while loop.
+     * Generate code for the for loop.
      *
      * @param output
      *            the code emitter (basically an abstraction for producing the
@@ -86,7 +86,36 @@ class JForStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        //TODO: Codegen using Jcc
+
+
+        //First we run initialization
+        for (JVariableDeclaration decl : declaration){
+            decl.codegen(output);
+        }
+
+        String test = output.createLabel(); //Test if for loop is true
+
+        String doneLabel = output.createLabel(); //Where to  branch if for loop is false
+
+        output.addLabel(test); //Place to go to test loop
+
+
+
+        condition.codegen(output,doneLabel,false);//Branch away from body when false
+
+        //Generate the body of the loop
+        body.codegen(output);
+
+        //Update values after run but before next test
+        for(JStatement mod: modif){
+            mod.codegen(output);
+        }   
+        //Always jump back to test:
+        output.addBranchInstruction(GOTO, test);
+
+        //Label of where to go when done.
+        output.addLabel(doneLabel);
+
     }
     
     public void writeToStdOut(PrettyPrinter p){
