@@ -145,7 +145,7 @@ class JPlusAssignOp extends JAssignment {
         if (!(lhs instanceof JLhs)) {
             JAST.compilationUnit.reportSemanticError(line(),
                     "Illegal lhs for assignment");
-	    return this;
+            return this;
         } else {
             lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
         }
@@ -180,6 +180,10 @@ class JPlusAssignOp extends JAssignment {
         ((JLhs) lhs).codegenLoadLhsLvalue(output);
         if (lhs.type().equals(Type.STRING)) {
             rhs.codegen(output);
+        } else if (lhs.type().equals(Type.DOUBLE)){
+        	((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(DADD);
         } else {
             ((JLhs) lhs).codegenLoadLhsRvalue(output);
             rhs.codegen(output);
@@ -248,12 +252,14 @@ class JMinusAssignOp extends JAssignment {
 	 
 	 public void codegen(CLEmitter output) {
 	        ((JLhs) lhs).codegenLoadLhsLvalue(output);
-	        if (lhs.type().equals(Type.STRING)) {
+	        if (lhs.type().equals(Type.DOUBLE)){
+	        	((JLhs) lhs).codegenLoadLhsRvalue(output);
 	            rhs.codegen(output);
+	            output.addNoArgInstruction(DSUB);
 	        } else {
 	            ((JLhs) lhs).codegenLoadLhsRvalue(output);
 	            rhs.codegen(output);
-	            output.addNoArgInstruction(IADD);
+	            output.addNoArgInstruction(ISUB);
 	        }
 	        if (!isStatementExpression) {
 	            // Generate code to leave the r-value atop stack
@@ -334,10 +340,15 @@ class JDivAssignOp extends JAssignment {
 
     public void codegen(CLEmitter output) {
         ((JLhs) lhs).codegenLoadLhsLvalue(output);
-
-        ((JLhs) lhs).codegenLoadLhsRvalue(output);
-        rhs.codegen(output);
-        output.addNoArgInstruction(IDIV);
+        if (lhs.type().equals(Type.DOUBLE)){
+        	((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(DDIV);
+        } else {
+            ((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(IDIV);
+        }
 
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack
@@ -408,9 +419,15 @@ class JMultAssignOp extends JAssignment {
 
     public void codegen(CLEmitter output) {
         ((JLhs) lhs).codegenLoadLhsLvalue(output);
-        ((JLhs) lhs).codegenLoadLhsRvalue(output);
-        rhs.codegen(output);
-        output.addNoArgInstruction(IMUL);
+        if (lhs.type().equals(Type.DOUBLE)){
+        	((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(DMUL);
+        } else {
+            ((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(IMUL);
+        }
         
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack
@@ -481,9 +498,15 @@ class JRemAssignOp extends JAssignment {
 
     public void codegen(CLEmitter output) {
         ((JLhs) lhs).codegenLoadLhsLvalue(output);
-        ((JLhs) lhs).codegenLoadLhsRvalue(output);
-        rhs.codegen(output);
-        output.addNoArgInstruction(IREM);
+        if (lhs.type().equals(Type.DOUBLE)){
+        	((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(DREM);
+        } else {
+            ((JLhs) lhs).codegenLoadLhsRvalue(output);
+            rhs.codegen(output);
+            output.addNoArgInstruction(IREM);
+        }
         
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack
