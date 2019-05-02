@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import static jminusminus.CLConstants.*;
 
 /** 
- * The AST node for a for-statement
+ * The AST node for a enhanced-for-statement
  */
 
 class JEnhancedForStatement extends JStatement {
@@ -56,6 +56,7 @@ class JEnhancedForStatement extends JStatement {
         //TODO : Shouldn't we check that the second argument has a similar type as the declared type ? 
         //id = (Type) id.analyze(this.context);
 
+
         body = (JStatement) body.analyze(this.context);
 
         
@@ -71,7 +72,56 @@ class JEnhancedForStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        //TODO: Codegen using Jcc
+
+        //First we run initialization
+        for (JVariableDeclaration decl : declaration){
+            decl.codegen(output);
+        }
+
+        id.codegen();
+
+        output.addNoArgInstruction(ALOAD_3);
+        output.addOneArgInstruction(ASTORE, 4);
+        output.addOneArgInstruction(ALOAD, 4);
+        output.addNoArgInstruction(ARRAYLENGTH);
+        output.addOneArgInstruction(ISTORE, 5);
+        output.addNoArgInstruction(ICONST_0);
+        output.addOneArgInstruction(ISTORE, 6);
+
+
+
+        String test = output.createLabel(); //Test if array still has elements
+
+        String doneLabel = output.createLabel(); //Where to  branch if no more elements
+
+        output.addLabel(test); //Place to go to test loop
+
+
+
+        output.addOneArgInstruction(ILOAD, 6);
+        output.addOneArgInstruction(ILOAD, 5);
+        
+
+        //INSERT BRANCH AWAY HERE
+        output.addBranchInstruction(IF_ICMPGE, doneLabel);
+
+        //Load next point off the array
+        output.addOneArgInstruction(ALOAD,4);
+
+        //Generate the body of the loop
+        body.codegen(output);
+
+        //Increment the counter.
+        output.addIINCInstruction(6, 1);
+
+        //Always jump back to test:
+        output.addBranchInstruction(GOTO, test);
+
+
+
+        //Label of where to go when done.
+        output.addLabel(doneLabel);
+
     }
     
     public void writeToStdOut(PrettyPrinter p){
