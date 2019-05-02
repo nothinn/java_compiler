@@ -1,0 +1,151 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Main",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-HTMLFileWriter<j-->",
+            "request": "launch",
+            "mainClass": "com.java2html.HTMLFileWriter",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Java2HTML<j-->",
+            "request": "launch",
+            "mainClass": "com.java2html.Java2HTML",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JavaDocManager<j-->",
+            "request": "launch",
+            "mainClass": "com.java2html.JavaDocManager",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JavaSource<j-->",
+            "request": "launch",
+            "mainClass": "com.java2html.JavaSource",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-j2h<j-->",
+            "request": "launch",
+            "mainClass": "j2h",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-javacc<j-->",
+            "request": "launch",
+            "mainClass": "javacc",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-jjdoc<j-->",
+            "request": "launch",
+            "mainClass": "jjdoc",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-jjtree<j-->",
+            "request": "launch",
+            "mainClass": "jjtree",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CLAbsorber<j-->",
+            "request": "launch",
+            "mainClass": "jminusminus.CLAbsorber",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JavaCCMain<j-->",
+            "request": "launch",
+            "mainClass": "jminusminus.JavaCCMain",
+            "cwd": "${workspaceFolder}/j--/src/jminusminus",
+            "sourcePaths": [
+                "/home/simon/DTU/Compiler/java_compiler/j--/src"
+            ],
+            "projectName": "j--",
+            "args": "../../tests/Step5/ForStatements.java -d tempdir"
+
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<j-->",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/j--/src/jminusminus",
+            "sourcePaths": [
+                "/home/simon/DTU/Compiler/java_compiler/j--/src"
+            ],
+            "mainClass": "jminusminus.Main",
+            "projectName": "j--",
+            "args": "../../tests/Step5/ForStatements.java -d tempdir"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-TestRunner<j-->",
+            "request": "launch",
+            "mainClass": "junit.awtui.TestRunner",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-TestRunner<j-->(1)",
+            "request": "launch",
+            "mainClass": "junit.swingui.TestRunner",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-TestRunner<j-->(2)",
+            "request": "launch",
+            "mainClass": "junit.textui.TestRunner",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-JJDocMain<j-->",
+            "request": "launch",
+            "mainClass": "org.javacc.jjdoc.JJDocMain",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<j-->(1)",
+            "request": "launch",
+            "mainClass": "org.javacc.jjtree.Main",
+            "projectName": "j--"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<j-->(2)",
+            "request": "launch",
+            "mainClass": "org.javacc.parser.Main",
+            "projectName": "j--"
+        }
+    ]
+}
