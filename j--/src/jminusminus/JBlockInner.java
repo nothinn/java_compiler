@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import static jminusminus.CLConstants.*;
 
 /**
  * The AST node for a block, which delimits a nested level of scope.
@@ -116,9 +117,9 @@ class JBlockInner extends JBlock implements JMember {
      */
 
     public void codegen(CLEmitter output) {
-        /*for (JStatement statement : statements) {
-            statement.codegen(output);
-        }*/
+    	//output.addNoArgInstruction(NOP);
+        body.codegen(output);
+        
     }
 
     /**
