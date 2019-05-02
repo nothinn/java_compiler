@@ -78,7 +78,7 @@ class JEnhancedForStatement extends JStatement {
             decl.codegen(output);
         }
 
-        id.codegen();
+        //id.codegen();
 
         output.addNoArgInstruction(ALOAD_3);
         output.addOneArgInstruction(ASTORE, 4);
