@@ -1014,19 +1014,12 @@ private JStatement statement(): {
         // Must be a statementExpression
         statement = statementExpression() 
         <SEMI> |
+        (
         <FOR> {line = token.beginLine;}
         <LPAREN>
-         ( LOOKAHEAD(type() <IDENTIFIER> <COLON>)
+         ( 
+         LOOKAHEAD(3)
             
-            tp = type()
-            <IDENTIFIER> { name = token.image; }
-            <COLON> 
-            expr= expression()
-            <RPAREN>
-            stat = statement()
-            {return new JEnhancedForStatement(line,tp,name,expr,stat);}) |
-           ( 
-        //LOOKAHEAD(localVariableDeclarationStatement() expression() <SEMI>)
             ini = localVariableDeclarationStatement()
             condition = expression()
             <SEMI>
@@ -1035,9 +1028,20 @@ private JStatement statement(): {
             statement = statement()
             
             {return new JForStatement(line,ini,condition,update,statement);}
+
+         
+         |
+        
+            tp = type()
+            <IDENTIFIER> { name = token.image; }
+            <COLON> 
+            expr= expression()
+            <RPAREN>
+            stat = statement()
+            {return new JEnhancedForStatement(line,tp,name,expr,stat);}
             )
         
-        
+        )
                              
     } 
     catch ( ParseException e ) { 
