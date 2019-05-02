@@ -879,8 +879,9 @@ public class Parser {
 			return new JEmptyStatement(line);
         } else if (have(FOR)){                               //for
             mustBe(LPAREN);                                   //(
-            ArrayList<JVariableDeclaration> init = forInit();
-            if(have(SEMI)){     //legacy for loop
+            if(seeLocalVariableDeclaration()){
+
+                JVariableDeclaration init = localVariableDeclarationStatement(); // normal for loop
                 JExpression condition = expression();          //i<10;
                 mustBe(SEMI);
                 ArrayList<JStatement> update = forUpdate();
@@ -888,12 +889,15 @@ public class Parser {
                 JStatement statement = statement();      // body of loop
                 return new JForStatement(line,init,condition,update,statement);
 
-            } else {
-                mustBe(COLON);             // enhanced for loop 
+            } else{
                 Type tp = type();
+                mustBe(IDENTIFIER);
+                String name = scanner.previousToken().image();
+                mustBe(COLON);             
+                JExpression exp = expression();
                 mustBe(RPAREN);
                 JStatement stat = statement();      // body of loop
-                return new JEnhancedForStatement(line,init,tp,stat);
+                return new JEnhancedForStatement(line,tp,name,exp,stat);
             }
                     
         } else { // Must be a statementExpression
@@ -912,16 +916,15 @@ public class Parser {
      *</pre>
      *
      **/
-   private ArrayList<JVariableDeclaration> forInit(){
-		ArrayList<JVariableDeclaration> parameters = new ArrayList<JVariableDeclaration>();
-        do{
-                JVariableDeclaration element = forVariableDeclarationStatement();
+   /*private JVariableDeclaration forInit(){
+		JVariableDeclaration parameters = new JVariableDeclaration();
+        JVariableDeclaration element = forVariableDeclarationStatement();
                 parameters.add(element);
-         }while(have(COMMA));  
-        
 
+            
+            // this cannot be an enhanced for loop 
         return parameters;
-    }
+    }*/
    
    /**
     * Parse a localVariableDeclaration WITHOUT a SEMI at the end
@@ -932,6 +935,7 @@ public class Parser {
 		ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
 		return new JVariableDeclaration(line, mods, vdecls);
 	}
+    
    
 
        
