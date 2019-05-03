@@ -234,7 +234,7 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
 
     /**
      * The semantics of j-- require that we implement short-circuiting branching
-     * in implementing the logical AND.
+     * in implementing the logical OR.
      * 
      * @param output
      *            the code emitter (basically an abstraction for producing the
@@ -246,7 +246,16 @@ class JLogicalOrOp extends JBooleanBinaryExpression {
      */
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
-        //TODO: Codegen using Jcc
+
+            if (!onTrue) {
+                String falseLabel = output.createLabel();
+                lhs.codegen(output, falseLabel, true);
+                rhs.codegen(output, targetLabel, false);
+                output.addLabel(falseLabel);
+            } else {
+                lhs.codegen(output, targetLabel, false);
+                rhs.codegen(output, targetLabel, false);
+            }
        }
 
 }

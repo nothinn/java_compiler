@@ -943,6 +943,10 @@ private JStatement statement(): {
 	ArrayList<JFormalParameter> catchParams =null;
 	ArrayList<JBlock> catchBlocks = null;
 	JBlock finalBlock = null;
+    JVariableDeclarator init = null;
+    JVariableDeclaration ini = null;
+    String name = null;
+
 	boolean hasCatch = false;
 }
 {       
@@ -1010,25 +1014,35 @@ private JStatement statement(): {
         // Must be a statementExpression
         statement = statementExpression() 
         <SEMI> |
-        <FOR> <LPAREN>
-        { line = token.beginLine; }
-        {ArrayList<JVariableDeclaration> init = forInit();}
-        
-        [ 
-        <SEMI>
-            {condition = expression();}
-            <SEMI>
-            { update = forUpdate();}
-            <RPAREN>
-            {statement = statement();}
+        (
+        <FOR> {line = token.beginLine;}
+        <LPAREN>
+         ( 
+         LOOKAHEAD(3)
             
-            {return new JForStatement(line,init,condition,update,statement);}
-         |<COLON> 
-            { tp = type();}
+            ini = localVariableDeclarationStatement()
+            condition = expression()
+            <SEMI>
+            update = forUpdate()
             <RPAREN>
-            {stat = statement();}
-            {return new JEnhancedForStatement(line,init,tp,stat);}
-            ]        
+            statement = statement()
+            
+            {return new JForStatement(line,ini,condition,update,statement);}
+
+         
+         |
+        
+            tp = type()
+            <IDENTIFIER> { name = token.image; }
+            <COLON> 
+            expr= expression()
+            <RPAREN>
+            stat = statement()
+            {return new JEnhancedForStatement(line,tp,name,expr,stat);}
+            )
+        
+        )
+                             
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 

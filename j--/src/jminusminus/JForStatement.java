@@ -8,7 +8,7 @@ import static jminusminus.CLConstants.*;
 
 class JForStatement extends JStatement {
     /** Test expression. */
-    private ArrayList<JVariableDeclaration> declaration;
+    private JVariableDeclaration declaration;
     private JExpression condition;
     private ArrayList<JStatement> modif;
     private LocalContext context;
@@ -29,7 +29,7 @@ class JForStatement extends JStatement {
      *            the body
      */
 
-    public JForStatement(int line,ArrayList<JVariableDeclaration> declaration, JExpression condition, ArrayList<JStatement> modif, JStatement body) {
+    public JForStatement(int line,JVariableDeclaration declaration, JExpression condition, ArrayList<JStatement> modif, JStatement body) {
         super(line);
         this.declaration= declaration;
         this.condition = condition;
@@ -50,12 +50,13 @@ class JForStatement extends JStatement {
         // local variable to store the data analyzed on the array
 
         this.context = new LocalContext(context);
-        if(declaration != null) {
+        /*if(declaration != null) {
             for (int i = 0; i < declaration.size(); i++) {
                 declaration.set(i, (JVariableDeclaration) declaration.get(i).analyze(
                         this.context));
             }
-        }
+        }*/
+        declaration.analyze(this.context);
         
         // Check condition type is boolean
         if(condition != null) {
@@ -89,9 +90,9 @@ class JForStatement extends JStatement {
 
 
         //First we run initialization
-        for (JVariableDeclaration decl : declaration){
-            decl.codegen(output);
-        }
+        //for (JVariableDeclaration decl : declaration){
+        declaration.codegen(output);
+        //}
 
         String test = output.createLabel(); //Test if for loop is true
 
@@ -123,9 +124,9 @@ class JForStatement extends JStatement {
         p.indentRight();
         p.printf("<Declaration>\n");
         
-        for(JVariableDeclaration i:declaration){
-            i.writeToStdOut(p);
-        }
+        //for(JVariableDeclaration i:declaration){
+            declaration.writeToStdOut(p);
+        //}
         p.printf("</Declaration>\n");
         p.printf("<Condition>\n");
         condition.writeToStdOut(p);

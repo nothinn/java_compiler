@@ -41,6 +41,9 @@ class JVariableDeclaration extends JStatement {
         this.decls = decls;
         initializations = new ArrayList<JStatement>();
     }
+    public ArrayList<JVariableDeclarator> getDecl(){
+        return this.decls;
+    }
 
     /**
      * Return the list of modifiers.

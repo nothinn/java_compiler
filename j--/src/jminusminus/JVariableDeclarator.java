@@ -43,6 +43,9 @@ class JVariableDeclarator extends JAST {
         this.type = type;
         this.initializer = initializer;
     }
+    public Type getType(){
+        return this.type();
+    }
 
     /**
      * Return the variable name.
