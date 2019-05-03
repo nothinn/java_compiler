@@ -93,6 +93,8 @@ class JArrayExpression
             output.addNoArgInstruction(BALOAD);
 	} else if (type == Type.CHAR) {
             output.addNoArgInstruction(CALOAD);
+        } else if (type == Type.DOUBLE) {
+            output.addNoArgInstruction(DALOAD);
         } else if (!type.isPrimitive()) {
             output.addNoArgInstruction(AALOAD);
         }
@@ -139,7 +141,9 @@ class JArrayExpression
 	} else if (type == Type.BOOLEAN) {
 	    output.addNoArgInstruction(BALOAD);
 	} else if (type == Type.CHAR) {
-	    output.addNoArgInstruction(CALOAD);
+        output.addNoArgInstruction(CALOAD);
+    } else if (type == Type.DOUBLE) {
+        output.addNoArgInstruction(DALOAD);
         } else if (!type.isPrimitive()) {
             output.addNoArgInstruction(AALOAD);
         }
@@ -177,7 +181,9 @@ class JArrayExpression
 	} else if (type == Type.BOOLEAN) {
 	    output.addNoArgInstruction(BASTORE);
 	} else if (type == Type.CHAR) {
-	    output.addNoArgInstruction(CASTORE);
+        output.addNoArgInstruction(CASTORE);
+    } else if (type == Type.DOUBLE) {
+        output.addNoArgInstruction(DASTORE);
         } else if (!type.isPrimitive()) {
             output.addNoArgInstruction(AASTORE);
         }

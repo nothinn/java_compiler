@@ -107,7 +107,9 @@ class JArrayInitializer
 	    } else if (componentType == Type.BOOLEAN) {
 		output.addNoArgInstruction(BASTORE);
 	    } else if (componentType == Type.CHAR) {
-		output.addNoArgInstruction(CASTORE);
+        output.addNoArgInstruction(CASTORE);
+        } else if (type == Type.DOUBLE){
+            output.addNoArgInstruction(DASTORE);
 	    } else if (!componentType.isPrimitive()) {
 		output.addNoArgInstruction(AASTORE);
 	    }
