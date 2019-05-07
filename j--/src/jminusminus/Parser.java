@@ -689,9 +689,9 @@ public class Parser {
 	 * Parse a interface member declaration.
 	 * 
 	 * <pre>
-	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
 							formalParameters
-							SEMI
+								[THROWS qualifiedIdentifier {, qualifiedIdentifier}] SEMI
 						| type variableDeclarators SEMI // field
 	 * </pre>
 	 * 
