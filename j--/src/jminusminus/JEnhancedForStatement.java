@@ -1,5 +1,7 @@
 package jminusminus;
 import java.util.ArrayList;
+
+
 import static jminusminus.CLConstants.*;
 
 /** 
@@ -10,8 +12,9 @@ class JEnhancedForStatement extends JStatement {
     /** Test expression. */
     private String name;
     private JExpression exp;
-    private Type id;
+    private Type id; //Identifier
 
+    private JForStatement forVersion; //We rewrite the enhanced for loop into a normal for loop 
 
 
     /** The Body */
@@ -36,8 +39,7 @@ class JEnhancedForStatement extends JStatement {
         this.body = body;
         this.name = name;
         this.exp = exp;
-
-
+        
     }
     
     /**
@@ -48,22 +50,104 @@ class JEnhancedForStatement extends JStatement {
      *            context in which names are resolved.
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
-
+    
     public JEnhancedForStatement analyze(Context context) {
-
-        this.context = new LocalContext(context);
-
-        //this.id.analyze(this.context);
-
-        /*
-           if(this.id != exp.type()){ 
-                JAST.compilationUnit.reportSemanticError(line(), "Type mismatch in For loop");
-            } */
-
-
-        body = (JStatement) body.analyze(this.context);
         
         
+        
+        
+        JFormalParameter param = new JFormalParameter(line, name, id);
+        
+        
+        
+        param =(JFormalParameter) param.analyze(context);
+        
+        
+        
+        //First we check if the expression is an array:
+        
+       /* if(!exp.type().isArray()){
+            JAST.compilationUnit.reportSemanticError(exp.line(),
+            "The expression is not an array.");
+        }*/
+        
+        //Check that it is the same type:
+        //param.type().mustMatchExpected(line, exp.type().componentType());
+        
+        //Analyze the array:
+        exp = exp.analyze(context);
+        
+        this.context = new LocalContext(context); 
+        
+        
+                //Take the next offset
+                int offset = this.context.nextOffset();
+
+        //Declare a new variable for iteration
+        LocalVariableDefn variable = new LocalVariableDefn(param.type().resolve(this.context),offset);
+        
+
+        //Add to the current local context
+        this.context.addEntry(param.line(), param.name(), variable);
+
+        //We can now declare a new variable, to use for our foor loop:
+        String newVar = "_i";
+
+        //We check that the name is not already used and if it is, we expand it
+        while(this.context.lookup(newVar) != null){
+            newVar += "_i";
+        }
+
+
+        //Now we declare the parts of the for loop:
+
+        //Declare the variable used for iterating the array, set to 0 as default.
+        JVariableDeclarator declarator = new JVariableDeclarator(line, newVar, Type.INT, new JLiteralInt(line,"0"));
+        
+        ArrayList<JVariableDeclarator> decl = new  ArrayList<JVariableDeclarator>();
+        decl.add(declarator);
+
+        JVariableDeclaration declaration = new JVariableDeclaration(line, new ArrayList<String> (), decl);
+
+        //Now for the condition:
+        JExpression lhs, rhs, condition;
+
+        //The lhs of the condition is the size of the array
+        lhs = new JFieldSelection(line, exp, "length");
+        
+        //The rhs is the new variable
+        rhs = new JVariable(line, newVar);
+
+        //And it has to run while the length is greater than the variable:
+        condition = new JGreaterThanOp(line, lhs, rhs);
+
+
+
+        //The update has to increment by 1 each time:
+        lhs = new JVariable(line, newVar);
+        rhs = new JLiteralInt(line,"1");
+        
+        ArrayList<JStatement> modif = new ArrayList<JStatement>();
+        modif.add(new JPlusAssignOp(line, lhs, rhs));
+
+
+        //The body needs to first load the next value from the array:
+        lhs = new JVariable(line, param.name());
+        rhs = new JArrayExpression(line, exp, new JVariable(line, newVar));
+        JStatement assign = new JAssignOp(line, lhs, rhs);
+
+
+        ArrayList<JStatement> statements = new ArrayList<JStatement>();
+
+        statements.add(assign);
+        statements.add(this.body);
+        JBlock newBody = new JBlock(line, statements);
+
+
+        forVersion = new JForStatement(line, declaration, condition, modif, newBody);
+
+        forVersion = forVersion.analyze(this.context);
+
         return this;
     }
 
@@ -76,57 +160,9 @@ class JEnhancedForStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-/*
-        //First we run initialization
-        for (JVariableDeclaration decl : declaration){
-            decl.codegen(output);
-        }
-
-        //id.codegen();
-
-        output.addNoArgInstruction(ALOAD_3);
-        output.addOneArgInstruction(ASTORE, 4);
-        output.addOneArgInstruction(ALOAD, 4);
-        output.addNoArgInstruction(ARRAYLENGTH);
-        output.addOneArgInstruction(ISTORE, 5);
-        output.addNoArgInstruction(ICONST_0);
-        output.addOneArgInstruction(ISTORE, 6);
 
 
-
-        String test = output.createLabel(); //Test if array still has elements
-
-        String doneLabel = output.createLabel(); //Where to  branch if no more elements
-
-        output.addLabel(test); //Place to go to test loop
-
-
-
-        output.addOneArgInstruction(ILOAD, 6);
-        output.addOneArgInstruction(ILOAD, 5);
-        
-
-        //INSERT BRANCH AWAY HERE
-        output.addBranchInstruction(IF_ICMPGE, doneLabel);
-
-        //Load next point off the array
-        output.addOneArgInstruction(ALOAD,4);
-
-        //Generate the body of the loop
-        body.codegen(output);
-
-        //Increment the counter.
-        output.addIINCInstruction(6, 1);
-
-        //Always jump back to test:
-        output.addBranchInstruction(GOTO, test);
-
-
-
-        //Label of where to go when done.
-        output.addLabel(doneLabel);
-
-        */
+        forVersion.codegen(output);
 
     }
     
