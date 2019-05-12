@@ -786,7 +786,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
 * Parse a interface member declaration.
 * 
 * <pre>
-*   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+*   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
 							formalParameters
 							[THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}]
 							SEMI
@@ -1828,7 +1828,7 @@ private JExpression equalityExpression(): {
  * 
  * <pre>
  *   relationalExpression ::= shiftExpression  // level 5
- *                              [(GT | LE) shiftExpression 
+ *                              [(GT | LE | LT | GE) shiftExpression 
  *                              | INSTANCEOF referenceType]
  * </pre>
  * 
@@ -1850,6 +1850,12 @@ private JExpression relationalExpression(): {
             <LE> 
             rhs = shiftExpression()
             { lhs = new JLessEqualOp( line, lhs, rhs ); } |
+            <LT> 
+            rhs = shiftExpression()
+            { lhs = new JLessThanOp( line, lhs, rhs ); } |
+            <GE> 
+            rhs = shiftExpression()
+            { lhs = new JGreaterEqualOp( line, lhs, rhs ); } |
             <INSTANCEOF> 
             type = referenceType()
             { lhs = new JInstanceOfOp( line, lhs, type ); }

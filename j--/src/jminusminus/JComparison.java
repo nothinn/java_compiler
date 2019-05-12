@@ -41,8 +41,9 @@ abstract class JComparison extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), lhs.type());
+        if(lhs.type() == Type.INT || lhs.type() == Type.DOUBLE){ //Has to be either double or int
+            rhs.type().mustMatchExpected(line(), lhs.type());
+        }
         type = Type.BOOLEAN;
         return this;
     }
@@ -88,9 +89,16 @@ class JGreaterThanOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output
-                .addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
-                        targetLabel);
+
+        if(lhs.type == Type.DOUBLE){
+            output.addNoArgInstruction(DCMPG); //We check if the two values are equal, greater than or less than
+            output.addNoArgInstruction(ICONST_0);
+        }
+
+
+        output.addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
+        targetLabel);
+
     }
 
 }
@@ -134,9 +142,128 @@ class JLessEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
+
+        if(lhs.type == Type.DOUBLE){
+            output.addNoArgInstruction(DCMPG); //We check if the two values are equal, greater than or less than
+            output.addNoArgInstruction(ICONST_0);
+        }
+
+
         output
                 .addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
                         targetLabel);
+    }
+
+}
+
+
+
+/**
+ * The AST node for a greater-than-or-equal-to (>=) expression. Implements
+ * short-circuiting branching.
+ */
+
+class JGreaterEqualOp extends JComparison {
+
+    /**
+     * Construct an AST node for a greater-than-or-equal-to expression given its
+     * line number, and the lhs and rhs operands.
+     * 
+     * @param line
+     *            line in which the greater-than-or-equal-to expression occurs in
+     *            the source file.
+     * @param lhs
+     *            lhs operand.
+     * @param rhs
+     *            rhs operand.
+     */
+
+    public JGreaterEqualOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">=", lhs, rhs);
+    }
+
+    /**
+     * Branching code generation for >= operation.
+     * 
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     * @param targetLabel
+     *            target for generated branch instruction.
+     * @param onTrue
+     *            should we branch on true?
+     */
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+
+        if(lhs.type == Type.DOUBLE){
+            output.addNoArgInstruction(DCMPG); //We check if the two values are equal, greater than or less than
+            output.addNoArgInstruction(ICONST_0);
+        }
+
+
+        output
+            .addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT,
+                    targetLabel);
+                
+    }
+
+}
+
+
+
+
+/**
+ * The AST node for a less-than (<) expression. Implements short-circuiting
+ * branching.
+ */
+
+class JLessThanOp extends JComparison {
+
+    /**
+     * Construct an AST node for a less-than expression given its line
+     * number, and the lhs and rhs operands.
+     * 
+     * @param line
+     *            line in which the less-than expression occurs in the source
+     *            file.
+     * @param lhs
+     *            lhs operand.
+     * @param rhs
+     *            rhs operand.
+     */
+
+    public JLessThanOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "<", lhs, rhs);
+    }
+
+    /**
+     * Branching code generation for < operation.
+     * 
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     * @param targetLabel
+     *            target for generated branch instruction.
+     * @param onTrue
+     *            should we branch on true?
+     */
+
+    public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+
+        if(lhs.type == Type.DOUBLE){
+            output.addNoArgInstruction(DCMPG);
+            output.addNoArgInstruction(ICONST_0);
+        }
+
+
+        output.addBranchInstruction(onTrue ? IF_ICMPLT : IF_ICMPGE,
+        targetLabel);
+        
     }
 
 }
