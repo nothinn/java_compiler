@@ -70,26 +70,11 @@ class JBlockInner extends JBlock implements JMember {
         return mods;
     }
 
-    /**
-     * NOT IMPLEMENTED YET!!!!!!!!
-     * 
-     * Declare this constructor in the parent (class) context.
-     * 
-     * @param context
-     *            the parent (class) context.
-     * @param partial
-     *            the code emitter (basically an abstraction for producing the
-     *            partial class).
-     */
 
-     
     public void preAnalyze(Context context, CLEmitter partial) {
-        /*if (isStatic) {
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Constructor cannot be declared static");
-        }*/
+     
     }
-
+    
     /**
      * 
      * Analyzing a block consists of creating a new nested context for that
@@ -106,7 +91,6 @@ class JBlockInner extends JBlock implements JMember {
     }
 
     /**
-     * NOT IMPLEMENTED YET!!!!!!!!
      * 
      * Generating code for a block consists of generating code for each of its
      * statements.
