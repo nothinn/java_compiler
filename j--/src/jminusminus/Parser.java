@@ -499,11 +499,13 @@ public class Parser {
 		String name = scanner.previousToken().image();
 		Type superClass;
 		ArrayList<Type> implementInterface = null;
+
 		if (have(EXTENDS)) {
 			superClass = qualifiedIdentifier();
 		} else {
 			superClass = Type.OBJECT;
 		}
+
 		if (have(IMPLEMENTS)) {
 			implementInterface = new ArrayList<Type>();
 			implementInterface.add(qualifiedIdentifier());
@@ -592,7 +594,7 @@ public class Parser {
 	 * @return list of members in the interface body.
 	 */
 
-	private ArrayList<JMember> interfaceBody() { // needs modification as there can be no bodies to the methods.
+	private ArrayList<JMember> interfaceBody() { 
 		ArrayList<JMember> members = new ArrayList<JMember>();
 		mustBe(LCURLY);
 		while (!see(RCURLY) && !see(EOF)) {
@@ -689,7 +691,11 @@ public class Parser {
 	 * Parse a interface member declaration.
 	 * 
 	 * <pre>
+<<<<<<< Updated upstream
 	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
+=======
+	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  
+>>>>>>> Stashed changes
 							formalParameters
 								[THROWS qualifiedIdentifier {, qualifiedIdentifier}] SEMI
 						| type variableDeclarators SEMI // field
@@ -908,24 +914,7 @@ public class Parser {
         
 	}
 
-    /** 
-     * Parse forInit parameters.
-     *<pre>
-     * forInit ::= statementExpression {, statementExpression}
-             | type variableDeclaration
-     *</pre>
-     *
-     **/
-   /*private JVariableDeclaration forInit(){
-		JVariableDeclaration parameters = new JVariableDeclaration();
-        JVariableDeclaration element = forVariableDeclarationStatement();
-                parameters.add(element);
-
-            
-            // this cannot be an enhanced for loop 
-        return parameters;
-    }*/
-   
+       
    /**
     * Parse a localVariableDeclaration WITHOUT a SEMI at the end
     **/
@@ -1271,6 +1260,10 @@ public class Parser {
 	 *       conditionalAndExpression // level 13
 	 *           [( ASSIGN  // conditionalExpression
 	 *            | PLUS_ASSIGN // must be valid lhs
+     *            | MULT_ASSIGN
+     *            | REM_ASSIGN
+     *            | DIV_ASSIGN
+     *            | MINUS_ASSIGN
 	 *            )
 	 *            assignmentExpression]
 	 * </pre>
@@ -1372,7 +1365,18 @@ public class Parser {
 		}
 		return lhs;
 	} 
-	
+
+	/**
+	 * Parse a bitwise-OR  expression.
+	 * 
+	 * <pre>
+	 *   bitwiseORExpression ::= bitwiseXORExpression// level 9
+	 *                                  {WXOR bitwiseXORExpression }
+	 * </pre>
+	 * 
+	 * @return an AST for a conditionalExpression.
+	 */
+
 
 	private JExpression bitwiseORExpression() {
 		int line= scanner.token().line();
@@ -1388,7 +1392,17 @@ public class Parser {
 		return lhs;
 	}
 	
-	
+	/**
+	 * Parse a bitwise-XOR  expression.
+	 * 
+	 * <pre>
+	 *   bitwiseXORExpression ::= bitwiseANDExpression// level 8
+	 *                                  {BWXOR bitwiseANDExpression }
+	 * </pre>
+	 * 
+	 * @return an AST for a conditionalExpression.
+	 */
+
 	private JExpression bitwiseXORExpression() {
 		int line= scanner.token().line();
 		boolean more = true;
@@ -1403,7 +1417,17 @@ public class Parser {
 		return lhs;
 	}
 	
-	
+   /**
+	 * Parse a bitwise-AND  expression.
+	 * 
+	 * <pre>
+	 *   bitwiseANDExpression ::= equalityExpression// level 8
+	 *                                  {BWAND equalityExpression }
+	 * </pre>
+	 * 
+	 * @return an AST for a conditionalExpression.
+	 */
+
 	private JExpression bitwiseANDExpression() {
 		int line= scanner.token().line();
 		boolean more = true;
@@ -1448,7 +1472,7 @@ public class Parser {
 	 * 
 	 * <pre>
 	 *   relationalExpression ::= shiftExpression  // level 5
-	 *                              [(GT | LE) shiftExpression 
+	 *                              [(GT | LE | LT | GE) shiftExpression 
 	 *                              | INSTANCEOF referenceType]
 	 * </pre>
 	 * 
@@ -1464,7 +1488,12 @@ public class Parser {
 			return new JLessEqualOp(line, lhs, shiftExpression());
 		} else if (have(INSTANCEOF)) {
 			return new JInstanceOfOp(line, lhs, referenceType());
-		} else {
+		} else if (have(LT)) {
+			return new JLessOp(line, lhs, shiftExpression());
+		} else if (have(GE)) {
+			return new JGreaterEqualOp(line, lhs, shiftExpression());
+		} 
+        else {
 			return lhs;
 		}
 	}
