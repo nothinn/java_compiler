@@ -691,11 +691,7 @@ public class Parser {
 	 * Parse a interface member declaration.
 	 * 
 	 * <pre>
-<<<<<<< Updated upstream
-	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
-=======
 	 *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  
->>>>>>> Stashed changes
 							formalParameters
 								[THROWS qualifiedIdentifier {, qualifiedIdentifier}] SEMI
 						| type variableDeclarators SEMI // field
@@ -913,22 +909,6 @@ public class Parser {
         }
         
 	}
-
-       
-   /**
-    * Parse a localVariableDeclaration WITHOUT a SEMI at the end
-    **/
-   private JVariableDeclaration forVariableDeclarationStatement() {
-		int line = scanner.token().line();
-		ArrayList<String> mods = new ArrayList<String>();
-		ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
-		return new JVariableDeclaration(line, mods, vdecls);
-	}
-    
-   
-
-       
-    
    
    /** 
      * Parse forUpdate parameters.
@@ -1489,7 +1469,7 @@ public class Parser {
 		} else if (have(INSTANCEOF)) {
 			return new JInstanceOfOp(line, lhs, referenceType());
 		} else if (have(LT)) {
-			return new JLessOp(line, lhs, shiftExpression());
+			return new JLessThanOp(line, lhs, shiftExpression());
 		} else if (have(GE)) {
 			return new JGreaterEqualOp(line, lhs, shiftExpression());
 		} 

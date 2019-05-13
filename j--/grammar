@@ -35,9 +35,9 @@ memberDecl ::= [STATIC] block         // inner block
                     (block | SEMI)
              | type variableDeclarators SEMI // field
              
-interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method // TODO: add exception handling
+interfaceMemberDecl ::= (VOID | type) IDENTIFIER  
 							formalParameters 
-							[THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}] SEMI
+                                 SEMI
 						| type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
@@ -54,7 +54,7 @@ statement ::= block
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
-            | FOR LPAREN [forInit] SEMI [expression] SEMI [forUpdate] | forInit COLON referenceType RPAREN statement
+            | FOR LPAREN [localVariableDeclarationStatement] SEMI [expression] SEMI [forUpdate] RPAREN statement | type IDENTIFIER COLON expression RPAREN statement
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]
@@ -64,13 +64,9 @@ formalParameter ::= type IDENTIFIER
 
 parExpression ::= LPAREN expression RPAREN
 
-forInit ::= statementExpression {COMMA statementExpression}
-             | type statements
-
 forUpdate ::= statementExpression {COMMA statementExpression}
 
 localVariableDeclarationStatement ::= type variableDeclarators SEMI
-forVariableDeclarationStatement ::= type variableDeclarators 
 
 variableDeclarators ::= variableDeclarator {COMMA variableDeclarator}
 
@@ -97,7 +93,7 @@ expression ::= assignmentExpression
 
 assignmentExpression ::= conditionalOpExpression  // must be a valid lhs - level 13
                            [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | MULT_ASSIGN | DIV_ASSIGN | REM_ASSIGN
-                             BWAND_ASSIGN | BWOR_ASSIGN | BWXOR_ASSIGN | SR_ASSIGN | SRL_ASSIGN | SL_ASSIGN) conditionalOpExpression]
+                             [conditionalExpression]
 
 conditionalExpression ::=  --Level 12
 	        conditionalOrExpression [ ? assignmentExpression : conditionalExpression]

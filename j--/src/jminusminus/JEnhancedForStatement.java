@@ -49,7 +49,7 @@ class JEnhancedForStatement extends JStatement {
      * @param context
      *            context in which names are resolved.
      * @return the analyzed (and possibly rewritten) AST subtree.
-     */
+     **/
     
     public JEnhancedForStatement analyze(Context context) {
         
@@ -64,18 +64,7 @@ class JEnhancedForStatement extends JStatement {
         
         
         
-        //First we check if the expression is an array:
-        
-       /* if(!exp.type().isArray()){
-            JAST.compilationUnit.reportSemanticError(exp.line(),
-            "The expression is not an array.");
-        }*/
-        
-        //Check that it is the same type:
-        //param.type().mustMatchExpected(line, exp.type().componentType());
-        
-        //Analyze the array:
-        exp = exp.analyze(context);
+         exp = exp.analyze(context);
         
         this.context = new LocalContext(context); 
         
@@ -149,10 +138,12 @@ class JEnhancedForStatement extends JStatement {
         forVersion = forVersion.analyze(this.context);
 
         return this;
-    }
-
+}
+        
+        
+        
     /**
-     * Generate code for the while loop.
+     * Generate code for the enhancedFor loop.
      *
      * @param output
      *            the code emitter (basically an abstraction for producing the

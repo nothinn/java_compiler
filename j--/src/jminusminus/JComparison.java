@@ -147,11 +147,7 @@ class JLessEqualOp extends JComparison {
             output.addNoArgInstruction(DCMPG); //We check if the two values are equal, greater than or less than
             output.addNoArgInstruction(ICONST_0);
         }
-
-
-        output
-                .addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
-                        targetLabel);
+        output.addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,targetLabel);
     }
 
 }
@@ -203,10 +199,7 @@ class JGreaterEqualOp extends JComparison {
             output.addNoArgInstruction(ICONST_0);
         }
 
-
-        output
-            .addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT,
-                    targetLabel);
+        output.addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT,targetLabel);
                 
     }
 

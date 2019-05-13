@@ -1782,11 +1782,7 @@ private JExpression equalityExpression(): {
  * 
  * <pre>
  *   relationalExpression ::= shiftExpression  // level 5
-<<<<<<< Updated upstream
- *                              [(GT | LE | LT | GE) shiftExpression 
-=======
  *                              [(GT | LE | GE | LT) shiftExpression 
->>>>>>> Stashed changes
  *                              | INSTANCEOF referenceType]
  * </pre>
  * 
@@ -1805,20 +1801,14 @@ private JExpression relationalExpression(): {
             <GT> 
             rhs = shiftExpression()
             { lhs = new JGreaterThanOp( line, lhs, rhs ); } |
-            <LT> 
+            <LE> 
             rhs = shiftExpression()
-            { lhs = new JLessOp( line, lhs, rhs ); } |
-            <GE> 
-            rhs = shiftExpression()
-<<<<<<< Updated upstream
             { lhs = new JLessEqualOp( line, lhs, rhs ); } |
             <LT> 
             rhs = shiftExpression()
             { lhs = new JLessThanOp( line, lhs, rhs ); } |
             <GE> 
             rhs = shiftExpression()
-=======
->>>>>>> Stashed changes
             { lhs = new JGreaterEqualOp( line, lhs, rhs ); } |
             <INSTANCEOF> 
             type = referenceType()
@@ -1971,7 +1961,7 @@ private JExpression unaryExpression(): {
         { expr = new JNegateOp( line, unaryExpr ); } |
         <UC> { line = token.beginLine; }
         unaryExpr = unaryExpression()
-        { expr = new JComplementeOp( line, unaryExpr ); } |
+        { expr = new JComplementOp( line, unaryExpr ); } |
         <PLUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JUnPlusOp(line,unaryExpr); } |
