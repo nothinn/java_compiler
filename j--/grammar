@@ -37,6 +37,7 @@ memberDecl ::= [STATIC] block         // inner block
              
 interfaceMemberDecl ::= (VOID | type) IDENTIFIER  
 							formalParameters 
+                            [THROWS qualifiedIdentifier{COMMA qualifiedIdentifier}]
                                  SEMI
 						| type variableDeclarators SEMI // field
 
