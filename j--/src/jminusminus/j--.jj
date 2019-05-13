@@ -921,7 +921,7 @@ private JStatement blockStatement(): {
  *				 | THROW expression SEMI
  *               | SEMI 
  *               | statementExpression SEMI
- *               | FOR parExpression statement
+ *               | FOR LPAREN [localVariableDeclarationStatement] SEMI [expression] SEMI [forUpdate] RPAREN statement | type IDENTIFIER COLON expression RPAREN statement
  * </pre>
  * 
  * @return an AST for a statement.
@@ -1049,52 +1049,6 @@ private JStatement statement(): {
     }
     { return statement; }
 }
-
-/** 
-* Parse forInit parameters.
-*<pre>
-* forInit ::= statementExpression {, statementExpression}
-*        | type variableDeclarators
-*</pre>
-*
-**/
-
-private ArrayList<JVariableDeclaration> forInit(): {
-    ArrayList<JVariableDeclaration> parameters = new ArrayList<JVariableDeclaration>();
-}
-{
-       try{
-           {parameters.add(forVariableDeclarationStatement());}
-       }
-       catch(ParseException e){
-           recoverFromError(new int[] {SEMI, EOF},e);
-       }
-       {
-           return parameters;
-       }
-}
-/**
-    * Parse a localVariableDeclaration WITHOUT a SEMI at the end
-    **/
-   private JVariableDeclaration forVariableDeclarationStatement(): {
-        int line = 0;
-        Type type = null;
-        ArrayList<JVariableDeclarator> vdecls = null;
-        ArrayList<String> mods = new ArrayList<String>();
-        }
-        {
-        try {
-            type = type() { line = token.beginLine; }
-            vdecls = variableDeclarators( type ) 
-        } 
-        catch ( ParseException e ) { 
-            recoverFromError( new int[] { SEMI,EOF }, e ); 
-        }   
-        { return new JVariableDeclaration( line, mods, vdecls ); }
-}
-       
-
-
 
    /** 
      * Parse forUpdate parameters.
@@ -1563,7 +1517,7 @@ private JExpression expression(): {
  *            | MULT_ASSIGN 
  *            | REM_ASSIGN 
  *            )
- *            assignmentExpression]
+ *            conditionalExpression]
  * </pre>
  * 
  * @return an AST for an assignmentExpression.
@@ -1706,7 +1660,7 @@ private JExpression conditionalAndExpression(): {
  * 
  * <pre>
  *   bitwise-ORExpression ::=  bitwiseXORExpression  // level 9
- *                            {XOR  bitwiseXORExpression}
+ *                            {WXOR  bitwiseXORExpression}
  * </pre>
  * 
  * @return an AST for a bitwise-ORExpression.
@@ -1737,7 +1691,7 @@ private JExpression bitwiseORExpression(): {
  * 
  * <pre>
  *   bitwise-XORExpression ::=  bitwiseANDExpression  // level 8
- *                            {XOR  bitwiseANDExpression}
+ *                            {BWXOR  bitwiseANDExpression}
  * </pre>
  * 
  * @return an AST for a bitwise-XORExpression.
@@ -1828,7 +1782,11 @@ private JExpression equalityExpression(): {
  * 
  * <pre>
  *   relationalExpression ::= shiftExpression  // level 5
+<<<<<<< Updated upstream
  *                              [(GT | LE | LT | GE) shiftExpression 
+=======
+ *                              [(GT | LE | GE | LT) shiftExpression 
+>>>>>>> Stashed changes
  *                              | INSTANCEOF referenceType]
  * </pre>
  * 
@@ -1847,14 +1805,20 @@ private JExpression relationalExpression(): {
             <GT> 
             rhs = shiftExpression()
             { lhs = new JGreaterThanOp( line, lhs, rhs ); } |
-            <LE> 
+            <LT> 
             rhs = shiftExpression()
+            { lhs = new JLessOp( line, lhs, rhs ); } |
+            <GE> 
+            rhs = shiftExpression()
+<<<<<<< Updated upstream
             { lhs = new JLessEqualOp( line, lhs, rhs ); } |
             <LT> 
             rhs = shiftExpression()
             { lhs = new JLessThanOp( line, lhs, rhs ); } |
             <GE> 
             rhs = shiftExpression()
+=======
+>>>>>>> Stashed changes
             { lhs = new JGreaterEqualOp( line, lhs, rhs ); } |
             <INSTANCEOF> 
             type = referenceType()
@@ -1981,9 +1945,10 @@ private JExpression multiplicativeExpression(): {
 * <pre>
 *   unaryExpression ::= |INC unaryExpression // level 1
 * 					   | DEC unaryExpression
-*                     | MINUS unaryExpression
-* 					   | PLUS unaryExpression
-*                     | simpleUnaryExpression
+*                      | MINUS unaryExpression
+* 	    			   | PLUS unaryExpression
+*                      | UC unaryExpression
+*                      | simpleUnaryExpression
 * </pre>
 * 
 * @return an AST for an unaryExpression.
@@ -2004,6 +1969,9 @@ private JExpression unaryExpression(): {
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JNegateOp( line, unaryExpr ); } |
+        <UC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JComplementeOp( line, unaryExpr ); } |
         <PLUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JUnPlusOp(line,unaryExpr); } |
@@ -2019,8 +1987,7 @@ private JExpression unaryExpression(): {
  * Parse a simple unary expression.
  * 
  * <pre>
- *   simpleUnaryExpression ::= UC unaryExpression
- *                           |LNOT unaryExpression
+ *   simpleUnaryExpression ::= LNOT unaryExpression
  *                           | LPAREN basicType RPAREN 
  *                               unaryExpression
  *                           | LPAREN         
@@ -2039,9 +2006,6 @@ private JExpression simpleUnaryExpression(): {
 }
 {
     try {
-        <UC> { line = token.beginLine; }
-        unaryExpr = unaryExpression()
-        { expr = new JComplementOp(line, unaryExpr) ;} |
         <LNOT> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JLogicalNotOp( line, unaryExpr ); } |
